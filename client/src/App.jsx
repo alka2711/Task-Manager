@@ -13,8 +13,8 @@ const App = () => {
         <main style={styles.mainContent}>
           <Routes>
             <Route path="/" element={<Homepage />} />
-            <Route path="/discussion" element={<DiscussionThread />} />
-            <Route path="/discussion/new" element={<DiscussionForm />} />
+            {/* <Route path="/discussion" element={<DiscussionThread />} />
+            <Route path="/discussion/new" element={<DiscussionForm />} /> */}
           </Routes>
         </main>
       </div>
