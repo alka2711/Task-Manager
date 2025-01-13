@@ -2,7 +2,11 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 
+
 import Navbar from "./components/Navbar/Navbar";
+import TaskItem from "./components/task/TaskItem";
+import TaskList from "./components/Task/TaskList";
+import TaskForm from "./components/task/TaskForm";
 
 
 const App = () => {
@@ -13,10 +17,15 @@ const App = () => {
         <main style={styles.mainContent}>
           <Routes>
             <Route path="/" element={<Homepage />} />
-            <Route path="/discussion" element={<DiscussionThread />} />
-            <Route path="/discussion/new" element={<DiscussionForm />} />
+            {/* <Route path="/discussion" element={<DiscussionThread />} /> */}
+            {/* </Routes><</main>Route path="/discussion/new" element={<DiscussionForm />} /></div> */}
           </Routes>
         </main>
+      </div>
+      <div>
+        <TaskList />
+        <TaskForm />
+        <TaskItem/>
       </div>
     </Router>
   );
