@@ -12,11 +12,11 @@ const activitySchema = new Schema({
 const taskSchema = new Schema({
     title: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
-    priority: { type: String, default: "normal", enum: ["high", "medium", "normal", "low"] },
+    priority: { type: String, enum: ["high", "medium", "low"] , required: true},
     status: { type: String, enum: ['pending', 'in-progress', 'completed'], default: 'pending', required: true },
     dueDate: { type: Date, required: true },
     activities: [activitySchema],
-    team: [{ type: Schema.Types.ObjectId, ref: "User" }]
+    team: [{ type: Schema.Types.ObjectId, ref: "User" , required: true}]
 }, { timestamps: true });
 
 const Task = mongoose.model("Task", taskSchema);

@@ -2,34 +2,48 @@ const Notifs = require('../models/notification');
 const Task = require('../models/task');
 const User = require('../models/user');
 
-const createTask = async (req, res) => {
+const createAndAssignTask = async (req, res) => {
     try {
         const { title, description, priority, dueDate, team } = req.body;
+        const assignerId = req.user._id;
 
-        // Create the task
-        const task = await Task.create({ title, description, team, dueDate, priority });
+        const assigner = await User.findById(assignerId);
 
-        // Prepare notification text
-        let text = "New task has been assigned to you";
-        if (task.team.length > 1) {
-            text += ` and ${task.team.length - 1} others.`;
+        if (!assigner) {
+            return res.status(404).json({ status: false, message: 'Assigner not found' });
+        }
+
+        const task = new Task({
+            title,
+            description,
+            priority,
+            dueDate,
+            team: [assignerId, ...team]
+        });
+
+        await task.save();
+
+        let text = `${assigner.name} has assigned a new task to you`;
+        if (task.team.length > 2) {
+            text += ` and ${task.team.length - 2} others.`;
         }
         text += ` Priority: ${task.priority}. Deadline: ${new Date(task.dueDate).toDateString()}`;
 
-        // Create notifications for each team member
-        const notifications = team.map(userId => ({
-            user: userId,
-            text,
-            task: task._id,
-        }));
+        const notifications = task.team
+            .filter(userId => userId.toString() !== assignerId.toString())
+            .map(userId => ({
+                user: userId,
+                title: `Task Assigned: ${task.title}`,
+                text,
+                task: task._id,
+                notiType: 'alert',
+            }));
 
-        // Save all notifications
         await Notifs.insertMany(notifications);
 
-        // Respond to the client with created task and notifications
         res.status(201).json({
             status: true,
-            message: "Task created successfully",
+            message: "Task created and assigned successfully",
             task,
             notifications,
         });
@@ -40,15 +54,19 @@ const createTask = async (req, res) => {
 };
 
 const submitTask = async (req, res) => {
-    const { taskId } = req.params; // Extract taskId from URL parameters
-    const { files, status } = req.body; // Extract files and status from request body
-    const userId = req.user._id; // Extract userId from authenticated user
+    const { taskId } = req.params;
+    const { files, status } = req.body;
+    const userId = req.user._id;
 
     try {
-        const task = await Task.findById(taskId); // Find the task by ID
+        const task = await Task.findById(taskId).populate('team');
 
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
+        }
+
+        if (task.team[0]._id.toString() === userId.toString()) {
+            return res.status(403).json({ message: 'Assigners cannot submit the task they assigned' });
         }
 
         const newActivity = {
@@ -57,8 +75,30 @@ const submitTask = async (req, res) => {
             files: files || [],
         };
 
-        task.activities.push(newActivity); // Add new activity to the task
-        await task.save(); // Save the updated task
+        task.activities.push(newActivity);
+
+        if (status === 'completed') {
+            const assignerId = task.team[0]._id;
+            const assignerNotification = {
+                user: assignerId,
+                title: `Task Completed: ${task.title}`,
+                text: `${req.user.name} has completed the task, waiting for your approval.`,
+                task: task._id,
+                notiType: 'alert',
+            };
+            await Notifs.create(assignerNotification);
+
+            const userNotification = {
+                user: userId,
+                title: `Task Submitted: ${task.title}`,
+                text: `Sent to ${task.team[0].name} for approval.`,
+                task: task._id,
+                notiType: 'alert',
+            };
+            await Notifs.create(userNotification);
+        }
+
+        await task.save();
 
         res.status(200).json({ message: 'Task activity updated', task });
     } catch (error) {
@@ -67,24 +107,22 @@ const submitTask = async (req, res) => {
     }
 };
 
+
 const dashboardStatistics = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        // Fetch all tasks for the user
         const allTasks = await Task.find({
             team: userId,
         })
             .populate({ path: "team", select: "name role title email" })
             .sort({ _id: -1 });
 
-        // Fetch active users (limit to 10)
         const users = await User.find({ isActive: true })
             .select("name title role createdAt")
             .limit(10)
             .sort({ _id: -1 });
 
-        // Group tasks by status and calculate counts
         const groupTasksByStatus = allTasks.reduce((result, task) => {
             const status = task.status;
 
@@ -97,7 +135,6 @@ const dashboardStatistics = async (req, res) => {
             return result;
         }, {});
 
-        // Group tasks by priority
         const groupData = Object.entries(
             allTasks.reduce((result, task) => {
                 const { priority } = task;
@@ -107,11 +144,9 @@ const dashboardStatistics = async (req, res) => {
             }, {})
         ).map(([name, total]) => ({ name, total }));
 
-        // Calculate total tasks and last 10 tasks
         const totalTasks = allTasks.length;
         const last10Tasks = allTasks.slice(0, 10);
 
-        // Prepare summary
         const summary = {
             totalTasks,
             last10Tasks,
@@ -163,25 +198,13 @@ const getTasks = async (req, res) => {
 const getTask = async (req, res) => {
     try {
         const { id } = req.params;
-
-        const task = await Task.findById(id)
-            .populate({
-                path: "team",
-                select: "name title role email",
-            })
-            .populate({
-                path: "activities.by",
-                select: "name",
-            });
+        const task = await Task.findById(id).populate('team', 'name title email');
 
         if (!task) {
-            return res.status(404).json({ status: false, message: "Task not found" });
+            return res.status(404).json({ status: false, message: 'Task not found' });
         }
 
-        res.status(200).json({
-            status: true,
-            task,
-        });
+        res.status(200).json({ status: true, task });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ status: false, message: 'Server error', error: error.message });
@@ -189,9 +212,9 @@ const getTask = async (req, res) => {
 };
 
 module.exports = {
-    createTask,
+    createAndAssignTask,
     submitTask,
     dashboardStatistics,
     getTasks,
-    getTask
+    getTask,
 };

@@ -1,21 +1,19 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.js');
+const Task = require('../models/task');
 
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
-        // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists with this email.' });
         }
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new user
         const user = new User({ name, email, role, password: hashedPassword });
         await user.save();
 
@@ -38,7 +36,7 @@ const loginUser  = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
             const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-            user.password = undefined; // Remove password from the response
+            user.password = undefined; 
             res.status(200).json({ token, user });
         } else {
             return res.status(401).json({ status: false, message: "Invalid email or password." });
@@ -49,19 +47,35 @@ const loginUser  = async (req, res) => {
     }
 };
 
-const getTeamList = async (req, res) => {
+
+const getTeamListByTaskId = async (req, res) => {
     try {
-        const users = await User.find().select("name role email");
-        res.status(200).json(users);
+        const { taskId } = req.params; 
+        const userId = req.user._id; 
+
+        const task = await Task.findById(taskId).populate('team', 'name role email');
+
+        if (!task) {
+            return res.status(404).json({ status: false, message: 'Task not found' });
+        }
+
+        const isUserAssigned = task.team.some(member => member._id.toString() === userId.toString());
+
+        if (!isUserAssigned) {
+            return res.status(403).json({ status: false, message: 'Forbidden, you are not assigned to this task' });
+        }
+
+        const teamMembers = task.team;
+
+        res.status(200).json(teamMembers);
     } catch (error) {
-        console.error(error); 
+        console.error(error);
         return res.status(500).json({ status: false, message: error.message });
     }
 };
 
-
 module.exports = {
     registerUser,
     loginUser,
-    getTeamList
+    getTeamListByTaskId, 
 };
