@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const express = require('express');
-const morgan = require('morgan');
+const cors = require('cors'); // Import CORS
+const cookieParser = require('cookie-parser');
 const { dbConnection } = require("./utils/index.js");
 const userRoutes = require('./routes/userRoutes.js');
 const taskRoutes = require('./routes/taskRoutes.js');
@@ -15,10 +16,11 @@ const PORT = process.env.PORT || 4444;
 const app = express();
 
 // Middleware
+app.use(cors({ origin: 'http://localhost:5173', credentials: true })); // Configure CORS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-app.use(morgan("dev"));
 app.use('/api/user', userRoutes);
 app.use('/api/task', taskRoutes);
 app.use('/api/notifs', notifsRoutes);

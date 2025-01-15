@@ -1,15 +1,32 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const generateToken = require('../utils/generateToken.js');
 const User = require('../models/user.js');
 const Task = require('../models/task');
+const { Schema } = mongoose;
+
+const userSchema = new Schema({
+    name: { type: String, required: true },
+    role: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, minlength: 8, required: true },
+}, { timestamps: true });
+
+// Method to compare plain text password with hashed password
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
+        console.log('Registering user:', { name, email, role });
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists with this email.' });
+            return res.status(400).json({ message: 'User already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -17,36 +34,89 @@ const registerUser = async (req, res) => {
         const user = new User({ name, email, role, password: hashedPassword });
         await user.save();
 
-        res.status(201).json({ message: 'User registered successfully', user });
+        res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Error registering user:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
-const loginUser  = async (req, res) => {
+const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
     try {
-        const { email, password } = req.body;
         const user = await User.findOne({ email });
 
-        if (!user) {
-            return res.status(401).json({ status: false, message: "Invalid email or password." });
-        }
+        if (user && (await user.matchPassword(password))) {
+            generateToken(res, user._id);
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (isMatch) {
-            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-            user.password = undefined; 
-            res.status(200).json({ token, user });
+            res.status(201).json({
+                message: 'User logged in successfully',
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+            });
         } else {
-            return res.status(401).json({ status: false, message: "Invalid email or password." });
+            res.status(401).json({ message: 'Invalid email or password' });
         }
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({ message: 'Error logging in', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
+const logoutUser = (req, res) => {
+    res.cookie('jwt', '', {
+        httpOnly: true,
+        expires: new Date(0),
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+};
+
+const getUser = async (req, res) => {
+    try {
+        if (req.user) {
+            res.json({
+                _id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const updateUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+
+            if (req.body.password) {
+                user.password = req.body.password;
+            }
+
+            const updatedUser = await user.save();
+
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
 
 const getTeamListByTaskId = async (req, res) => {
     try {
@@ -77,5 +147,8 @@ const getTeamListByTaskId = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
-    getTeamListByTaskId, 
+    logoutUser,
+    getUser,
+    updateUser
+    // getTeamListByTaskId,
 };
