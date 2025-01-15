@@ -10,15 +10,6 @@ import './App.css';
 const App = () => {
   return (
     <Router>
-<<<<<<< HEAD
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        
-      </Routes>
-=======
       <div>
         
         <Routes>
@@ -29,7 +20,6 @@ const App = () => {
           <Route path="/login" element={<Login />} />
         </Routes>
       </div>
->>>>>>> ffdb0044ec0c4d94d6b99c274fbba51c107114d9
     </Router>
   );
 };
