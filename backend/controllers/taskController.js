@@ -168,30 +168,30 @@ const dashboardStatistics = async (req, res) => {
 
 const getTasks = async (req, res) => {
     try {
-        const { stage } = req.query;
-
+        const { search, sort } = req.query;
         let query = {};
 
-        if (stage) {
-            query.stage = stage;
+        if (search) {
+            query = {
+                ...query,
+                $or: [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                ],
+            };
         }
 
-        let queryResult = Task.find(query)
-            .populate({
-                path: "team",
-                select: "name title email",
-            })
-            .sort({ _id: -1 });
+        let sortOption = {};
+        if (sort === 'priority') {
+            sortOption = { priority: 1 }; // Sort by priority ascending
+        } else if (sort === 'status') {
+            sortOption = { status: 1 }; // Sort by status ascending
+        }
 
-        const tasks = await queryResult;
-
-        res.status(200).json({
-            status: true,
-            tasks,
-        });
+        const tasks = await Task.find(query).sort(sortOption);
+        res.json({ tasks });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ status: false, message: 'Server error', error: error.message });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
