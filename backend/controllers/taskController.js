@@ -70,14 +70,15 @@ const submitTask = async (req, res) => {
         }
 
         const newActivity = {
-            status, 
+            status: 'sent for review',
             by: userId, 
             files: files || [],
         };
 
         task.activities.push(newActivity);
+        task.status = 'sent for review';
 
-        if (status === 'completed') {
+        
             const assignerId = task.team[0]._id;
             const assignerNotification = {
                 user: assignerId,
@@ -91,12 +92,12 @@ const submitTask = async (req, res) => {
             const userNotification = {
                 user: userId,
                 title: `Task Submitted: ${task.title}`,
-                text: `Sent to ${task.team[0].name} for approval.`,
+                text: `Sent to ${task.team[0].name} for review.`,
                 task: task._id,
                 notiType: 'alert',
             };
             await Notifs.create(userNotification);
-        }
+        
 
         await task.save();
 
@@ -169,7 +170,10 @@ const dashboardStatistics = async (req, res) => {
 const getTasks = async (req, res) => {
     try {
         const { search, sort } = req.query;
-        let query = {};
+        const userId = req.user._id; // Get the logged-in user's ID
+        let query = {
+            team: userId, // Include only tasks where the user is part of the team
+        };
 
         if (search) {
             query = {
@@ -191,7 +195,8 @@ const getTasks = async (req, res) => {
         const tasks = await Task.find(query).sort(sortOption);
         res.json({ tasks });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.log(error);
+        res.status(500).json({ status: false, message: 'Server error', error: error.message });
     }
 };
 
