@@ -1,24 +1,27 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import './App.css';
 import Home from './components/Home';
-import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import Navbar from './components/Navbar';
-// import TaskDetails from './components/TaskDetails';
+import MyTasks from './components/MyTasks';
+import Analytics from './components/Analytics';
+import Login from './components/Login';
+import './App.css';
 
-function App() {
+const App = () => {
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/task/:id" element={<TaskDetails />} /> */}
-      </Routes>
+      <div>
+        
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tasks" element={<MyTasks />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
     </Router>
   );
-}
+};
 
 export default App;

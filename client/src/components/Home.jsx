@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import backgroundImage from '../assets/background.jpg';
+import SimpleNavbar from './SimpleNavbar';
 
 const Home = () => {
   const [name, setName] = useState('');
@@ -12,7 +14,7 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('/api/user/register', { name, email, password, role });
+      const { data } = await axios.post('http://localhost:4444/api/user/register', { name, email, password, role });
       localStorage.setItem('userInfo', JSON.stringify(data));
       navigate('/dashboard');
     } catch (error) {
@@ -22,46 +24,48 @@ const Home = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Welcome to Task Manager</h1>
-      <p style={styles.paragraph}>Manage your tasks efficiently and effectively.</p>
-      
-      <div style={styles.registerBox}>
-        {/* <h2 style={styles.registerHeading}>Register</h2> */}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={styles.input}
-          />
-          <input
-            type="text"
-            placeholder="Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            style={styles.input}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-          />
-          <button type="submit" style={styles.button}>Register</button>
-        </form>
-        <p style={styles.loginText}>
-          Already have an account? <Link to="/login" style={styles.loginLink}>Login</Link>
-        </p>
+    <div>
+      <SimpleNavbar />
+      <div style={styles.container}>
+        <h1 style={styles.heading}>Welcome to Task Manager</h1>
+        <p style={styles.paragraph}>Manage your tasks efficiently and effectively.</p>
+        
+        <div style={styles.registerBox}>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={styles.input}
+            />
+            <input
+              type="text"
+              placeholder="Role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={styles.input}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={styles.input}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={styles.input}
+            />
+            <button type="submit" style={styles.button}>Register</button>
+          </form>
+          <p style={styles.loginText}>
+            Already have an account? <Link to="/login" style={styles.loginLink}>Login</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -69,13 +73,14 @@ const Home = () => {
 
 const styles = {
   container: {
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100vh',
-    backgroundColor: '#f5f5f5',
-    color: '#333',
   },
   heading: {
     marginBottom: '20px',
@@ -85,27 +90,12 @@ const styles = {
     marginBottom: '20px',
     fontSize: '1.2rem',
   },
-  linksContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '20px',
-  },
-  link: {
-    margin: '0 10px',
-    color: '#007bff',
-    textDecoration: 'none',
-  },
   registerBox: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.53)', // Translucent white background
     padding: '20px',
     borderRadius: '8px',
     boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
     width: '300px',
-  },
-  registerHeading: {
-    marginBottom: '20px',
-    fontSize: '1.5rem',
-    textAlign: 'center',
   },
   form: {
     display: 'flex',
