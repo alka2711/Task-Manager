@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Navbar = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -7,7 +9,7 @@ const Navbar = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userName, setUserName] = useState(""); // State to store the user's name
+  const [userName, setUserName] = useState("");
 
   const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
@@ -17,14 +19,23 @@ const Navbar = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
+        setLoading(true);
         const response = await fetch("/api/notifications");
+
         if (!response.ok) {
           throw new Error("Failed to fetch notifications");
         }
+
         const data = await response.json();
         setNotifications(data);
+
+        // Display a toast for each notification
+        data.forEach((notification) => {
+          toast.info(`New Notification: ${notification.message}`);
+        });
       } catch (err) {
         setError(err.message);
+        toast.error(`Error: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -34,10 +45,10 @@ const Navbar = () => {
 
     const handleClickOutside = (event) => {
       if (
-        dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-        notificationIconRef.current && !notificationIconRef.current.contains(event.target) &&
-        userDropdownRef.current && !userDropdownRef.current.contains(event.target) &&
-        userIconRef.current && !userIconRef.current.contains(event.target)
+        !dropdownRef.current?.contains(event.target) &&
+        !notificationIconRef.current?.contains(event.target) &&
+        !userDropdownRef.current?.contains(event.target) &&
+        !userIconRef.current?.contains(event.target)
       ) {
         setIsDropdownVisible(false);
         setIsUserDropdownVisible(false);
@@ -52,7 +63,7 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     if (userInfo && userInfo.name) {
       setUserName(userInfo.name);
     }
@@ -64,13 +75,38 @@ const Navbar = () => {
   };
 
   const handleUserDropdownClick = () => {
-    setIsUserDropdownVisible(!isUserDropdownVisible);
+    setIsUserDropdownVisible((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    alert("Logging out...");
-    localStorage.removeItem('userInfo');
-    // You can handle logout logic here (e.g., clear session, redirect to login, etc.)
+  const handleLogout = async () => {
+    try {
+      toast.info("Logging out...");
+      
+      // Perform server-side logout
+      const response = await fetch("/api/user/logout", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to logout. Please try again.");
+      }
+  
+      // Clear local storage after successful logout
+      localStorage.removeItem("userInfo");
+      
+      // Redirect to login or home page
+      window.location.href = "/"; // Adjust the URL as needed
+    } catch (error) {
+      toast.error(`Logout failed: ${error.message}`);
+    }
+  };
+  
+
+  const toggleNotifications = () => {
+    setIsDropdownVisible((prev) => !prev);
   };
 
   return (
@@ -78,17 +114,16 @@ const Navbar = () => {
       <div style={styles.logo}>
         <span style={styles.logoText}>TASKMASTER</span>
       </div>
-      <div style={styles.searchBar}>
-        <input type="text" placeholder="Search..." style={styles.searchInput} />
-      </div>
       <div style={styles.icons}>
+        {/* Notification Icon */}
         <span
           ref={notificationIconRef}
           style={styles.icon}
-          onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+          onClick={toggleNotifications}
         >
           🔔
         </span>
+        <ToastContainer />
         {isDropdownVisible && (
           <div ref={dropdownRef} style={styles.dropdown}>
             {loading ? (
@@ -110,6 +145,8 @@ const Navbar = () => {
             )}
           </div>
         )}
+
+        {/* User Icon */}
         <span
           ref={userIconRef}
           style={styles.icon}
@@ -119,12 +156,18 @@ const Navbar = () => {
         </span>
         {isUserDropdownVisible && (
           <div ref={userDropdownRef} style={styles.userDropdown}>
-            <p style={styles.dropdownItem}><strong>{userName}</strong></p>
+            <p style={styles.dropdownItem}>
+              <strong>{userName || "Guest"}</strong>
+            </p>
             <button style={styles.button}>Settings</button>
-            <button style={styles.button} onClick={handleLogout}>Logout</button>
+            <button style={styles.button} onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         )}
       </div>
+
+      {/* Popup Message */}
       {notificationMessage && (
         <div style={styles.popup}>
           <div style={styles.popupContent}>
@@ -133,7 +176,7 @@ const Navbar = () => {
               style={styles.button}
               onClick={() => setNotificationMessage("")}
             >
-              Accept
+              Close
             </button>
           </div>
         </div>
@@ -148,7 +191,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "space-between",
     padding: "10px 20px",
-    backgroundColor:"black",
+    backgroundColor: "black",
     color: "#fff",
   },
   logo: {
@@ -160,21 +203,10 @@ const styles = {
     fontWeight: "bold",
     color: "#fff",
   },
-  searchBar: {
-    flexGrow: 1,
-    marginLeft: "20px",
-    marginRight: "20px",
-  },
-  searchInput: {
-    width: "90%",
-    padding: "8px 12px",
-    borderRadius: "20px",
-    border: "1px solid #ccc",
-  },
   icons: {
     display: "flex",
     alignItems: "center",
-    gap: "30px",
+    gap: "20px",
   },
   icon: {
     fontSize: "20px",
@@ -190,15 +222,18 @@ const styles = {
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
     maxHeight: "200px",
     overflowY: "auto",
+    zIndex: 1000,
   },
   userDropdown: {
     backgroundColor: "#fff",
+    color: "black",
     padding: "10px",
     position: "absolute",
     top: "40px",
     right: "10px",
     borderRadius: "5px",
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+    zIndex: 1000,
   },
   dropdownItem: {
     padding: "8px 10px",

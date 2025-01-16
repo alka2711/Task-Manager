@@ -14,9 +14,9 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:4444/api/user/register', { name, email, password, role });
+      const { data } = await axios.post('/api/user/register', { name, email, password, role });
       localStorage.setItem('userInfo', JSON.stringify(data));
-      navigate('/dashboard');
+      navigate('/login');
     } catch (error) {
       console.error('Error registering user:', error);
       alert('Error registering user');

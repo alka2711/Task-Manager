@@ -141,7 +141,7 @@ const Dashboard = () => {
                 <p>Priority: {task.priority}</p>
                 <p>Status: {task.status}</p>
                 <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
-                {task.status !== 'sent for review' && (
+                {task.status !== 'sent for review' && task.status !== 'completed' && (
                   <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
                     Submit
                   </button>
