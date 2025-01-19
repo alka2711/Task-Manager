@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import backgroundImage from '../assets/background.jpg';
 import SimpleNavbar from './SimpleNavbar';
 
 const Home = () => {
@@ -73,57 +72,67 @@ const Home = () => {
 
 const styles = {
   container: {
-    backgroundImage: `url(${backgroundImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundColor: '#f7f7f7',  // Light grey background for the whole page
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    fontFamily: 'Arial, sans-serif',
   },
   heading: {
     marginBottom: '20px',
-    fontSize: '2rem',
+    fontSize: '2.5rem',
+    color: '#003300',  // Green color for heading
+    fontWeight: 'bold',
   },
   paragraph: {
-    marginBottom: '20px',
+    marginBottom: '30px',
     fontSize: '1.2rem',
+    color: '#333',
   },
   registerBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.53)', // Translucent white background
-    padding: '20px',
+    backgroundColor: '#ffffff', // White background for the registration box
+    padding: '40px 30px',
     borderRadius: '8px',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-    width: '300px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    width: '350px',
+    textAlign: 'center',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
   },
   input: {
-    marginBottom: '10px',
-    padding: '10px',
+    marginBottom: '15px',
+    padding: '15px',  // Increased padding for bigger input fields
     fontSize: '16px',
     borderRadius: '4px',
     border: '1px solid #ccc',
+    transition: 'border-color 0.3s',
+    width: '100%',  // Ensures input fields take up the full width of the container
   },
   button: {
-    padding: '10px',
+    padding: '12px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#003300',  // Darker green background for the button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+    transition: 'background-color 0.3s',
   },
+  
   loginText: {
-    marginTop: '10px',
+    marginTop: '15px',
     textAlign: 'center',
+    fontSize: '1rem',
+    color: '#555',
   },
   loginLink: {
-    color: '#007bff',
+    color: '#2d6a4f',  // Green color for the login link
     textDecoration: 'none',
+    fontWeight: 'bold',
   },
 };
 

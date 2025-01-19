@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import backgroundImage from '../assets/background.jpg'; // Adjust the path if necessary
 import SimpleNavbar from './SimpleNavbar';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,86 +21,90 @@ const Login = () => {
   };
 
   return (
-    
     <div>
-      <SimpleNavbar/>
+      <SimpleNavbar />
       <div style={styles.container}>
-      <h2 style={styles.heading}>Login</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>Login</button>
-      </form>
-      <p style={styles.registerText}>
-        Don't have an account? <Link to="/" style={styles.registerLink}>Register</Link>
-      </p>
-    </div>
+        <h2 style={styles.heading}>Login</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={styles.input}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={styles.input}
+          />
+          <button type="submit" style={styles.button}>Login</button>
+        </form>
+        <p style={styles.registerText}>
+          Don't have an account? <Link to="/" style={styles.registerLink}>Register</Link>
+        </p>
+      </div>
     </div>
   );
 };
 
 const styles = {
   container: {
-    backgroundImage: `url(${backgroundImage})`, // Set the background image
-    backgroundSize: 'cover',                   // Cover the entire container
-    backgroundPosition: 'center',              // Center the image
-    height: '100vh',                           // Full viewport height
+    backgroundColor: '#f7f7f7',  // Light grey background
+    height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#333',                             // Text color
+    fontFamily: 'Arial, sans-serif',
   },
   heading: {
     marginBottom: '20px',
-    fontSize: '2rem',
-    color: 'white',                            // Make the text stand out on the background
+    fontSize: '2.5rem',
+    color: '#003300',  // Green color for heading
+    fontWeight: 'bold',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    width: '300px',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Translucent white background for form
-    padding: '20px',
+    width: '350px',
+    backgroundColor: '#ffffff',  // White background for form
+    padding: '40px 30px',
     borderRadius: '8px',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',    // Slight shadow for better visibility
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
   },
   input: {
-    marginBottom: '10px',
-    padding: '10px',
+    marginBottom: '15px',
+    padding: '15px',
     fontSize: '16px',
     borderRadius: '4px',
     border: '1px solid #ccc',
+    width: '100%',  // Full width input
   },
   button: {
-    padding: '10px',
+    padding: '12px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#003300',  // Green background for the button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+    transition: 'background-color 0.3s',
   },
+  
   registerText: {
-    marginTop: '10px',
+    marginTop: '15px',
     textAlign: 'center',
-    color: 'white',
+    fontSize: '1rem',
+    color: '#555',
   },
   registerLink: {
-    color: '#007bff',
+    color: '#2d6a4f',  // Green color for the register link
     textDecoration: 'none',
+    fontWeight: 'bold',
   },
 };
 

@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
@@ -26,13 +27,14 @@ const Dashboard = () => {
         params: {
           search: searchTerm,
           sort: sortOption,
+          status: statusFilter,
         },
       });
       setTasks(data.tasks);
     };
 
     fetchTasks();
-  }, [searchTerm, sortOption]);
+  }, [searchTerm, sortOption, statusFilter]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -40,6 +42,10 @@ const Dashboard = () => {
 
   const handleSort = (e) => {
     setSortOption(e.target.value);
+  };
+
+  const handleStatusFilter = (e) => {
+    setStatusFilter(e.target.value);
   };
 
   const handleAddTask = () => {
@@ -68,6 +74,7 @@ const Dashboard = () => {
         params: {
           search: searchTerm,
           sort: sortOption,
+          status: statusFilter,
         },
       });
       setTasks(data.tasks);
@@ -104,6 +111,7 @@ const Dashboard = () => {
         params: {
           search: searchTerm,
           sort: sortOption,
+          status: statusFilter,
         },
       });
       setTasks(data.tasks);
@@ -112,137 +120,168 @@ const Dashboard = () => {
     }
   };
 
+  const sortTasks = (tasks) => {
+    if (sortOption === 'priority') {
+      return tasks.sort((a, b) => {
+        const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
+    } else if (sortOption === 'dueDate') {
+      return tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    }
+    return tasks;
+  };
+
+  const filteredAndSortedTasks = sortTasks(
+    tasks.filter((task) => !statusFilter || task.status === statusFilter)
+  );
+
   return (
     <div style={styles.container}>
       <Navbar />
-      <h2 style={styles.heading}>Dashboard</h2>
-      <div style={styles.searchSortContainer}>
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchTerm}
-          onChange={handleSearch}
-          style={styles.searchInput}
-        />
-        <select value={sortOption} onChange={handleSort} style={styles.sortSelect}>
-          <option value="">Sort by</option>
-          <option value="priority">Priority</option>
-          <option value="status">Status</option>
-        </select>
-      </div>
-      <button onClick={handleAddTask} style={styles.addButton}>Create Task</button>
-      <div style={styles.contentContainer}>
-        <div style={styles.taskContainer}>
-          <ul style={styles.taskList}>
-            {tasks.map((task) => (
-              <li key={task._id} style={styles.taskItem}>
-                <h3>{task.title}</h3>
-                <p>{task.description}</p>
-                <p>Priority: {task.priority}</p>
-                <p>Status: {task.status}</p>
-                <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
-                {task.status !== 'sent for review' && task.status !== 'completed' && (
-                  <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
-                    Submit
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+      <div style={styles.content}>
+        <h2 style={styles.heading}>Dashboard</h2>
+        <div style={styles.searchSortContainer}>
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={handleSearch}
+            style={styles.searchInput}
+          />
+          <select value={statusFilter} onChange={handleStatusFilter} style={styles.filterSelect}>
+            <option value="">Filter by Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="sent for review">Sent for Review</option>
+          </select>
+          <select value={sortOption} onChange={handleSort} style={styles.sortSelect}>
+            <option value="">Sort by</option>
+            <option value="priority">Priority</option>
+            <option value="dueDate">Due Date</option>
+          </select>
         </div>
-        <div style={styles.analyticsContainer}>
-          <Analytics />
+        <button onClick={handleAddTask} style={styles.addButton}>Create Task</button>
+        <div style={styles.contentContainer}>
+          <div style={styles.taskContainer}>
+            <ul style={styles.taskList}>
+              {filteredAndSortedTasks.map((task) => (
+                <li key={task._id} style={styles.taskItem}>
+                  <h3>{task.title}</h3>
+                  <p>{task.description}</p>
+                  <p>Priority: {task.priority}</p>
+                  <p>Status: {task.status}</p>
+                  <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
+                  {task.status !== 'sent for review' && task.status !== 'completed' && (
+                    <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
+                      Submit
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={styles.analyticsContainer}>
+            <Analytics />
+          </div>
         </div>
-      </div>
-      {showModal && (
-        <div style={styles.modal}>
-          <div style={styles.modalContent}>
-            <h3>Create Task</h3>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="title"
-                placeholder="Title"
-                value={newTask.title}
-                onChange={handleInputChange}
-                style={styles.input}
-              />
-              <textarea
-                name="description"
-                placeholder="Description"
-                value={newTask.description}
-                onChange={handleInputChange}
-                style={styles.textarea}
-              />
-              <select
-                name="priority"
-                value={newTask.priority}
-                onChange={handleInputChange}
-                style={styles.input}
-              >
-                <option value="" disabled>Priority</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-              <input
-                type="date"
-                name="dueDate"
-                value={newTask.dueDate}
-                onChange={handleInputChange}
-                style={styles.input}
-              />
-              <select
-                name="assignTo"
-                value={newTask.assignTo}
-                onChange={handleInputChange}
-                style={styles.input}
-              >
-                <option value="self">Assign to Self</option>
-                <option value="others">Assign to Others</option>
-              </select>
-              {newTask.assignTo === 'others' && (
+        {showModal && (
+          <div style={styles.modal}>
+            <div style={styles.modalContent}>
+              <h3>Create Task</h3>
+              <form onSubmit={handleSubmit}>
                 <input
                   type="text"
-                  name="userIds"
-                  placeholder="Enter User IDs (comma separated)"
-                  value={newTask.userIds}
+                  name="title"
+                  placeholder="Title"
+                  value={newTask.title}
                   onChange={handleInputChange}
                   style={styles.input}
                 />
-              )}
-              <button type="submit" style={styles.button}>Create</button>
-              <button type="button" onClick={handleCloseModal} style={styles.button}>Close</button>
-            </form>
+                <textarea
+                  name="description"
+                  placeholder="Description"
+                  value={newTask.description}
+                  onChange={handleInputChange}
+                  style={styles.textarea}
+                />
+                <select
+                  name="priority"
+                  value={newTask.priority}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                >
+                  <option value="" disabled>Priority</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+                <input
+                  type="date"
+                  name="dueDate"
+                  value={newTask.dueDate}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                />
+                <select
+                  name="assignTo"
+                  value={newTask.assignTo}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                >
+                  <option value="self">Assign to Self</option>
+                  <option value="others">Assign to Others</option>
+                </select>
+                {newTask.assignTo === 'others' && (
+                  <input
+                    type="text"
+                    name="userIds"
+                    placeholder="Enter User IDs (comma separated)"
+                    value={newTask.userIds}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                  />
+                )}
+                <button type="submit" style={styles.button}>Create</button>
+                <button type="button" onClick={handleCloseModal} style={styles.button}>Close</button>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-      {showPopup && (
-        <div style={styles.popup}>
-          <div style={styles.popupContent}>
-            <h3>Submit Task</h3>
-            <input
-              type="text"
-              placeholder="Attachment link"
-              value={attachment}
-              onChange={(e) => setAttachment(e.target.value)}
-              style={styles.input}
-            />
-            <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
-            <button onClick={handleClosePopup} style={styles.button}>Close</button>
+        )}
+        {showPopup && (
+          <div style={styles.popup}>
+            <div style={styles.popupContent}>
+              <h3>Submit Task</h3>
+              <input
+                type="text"
+                placeholder="Attachment link"
+                value={attachment}
+                onChange={(e) => setAttachment(e.target.value)}
+                style={styles.input}
+              />
+              <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
+              <button onClick={handleClosePopup} style={styles.button}>Close</button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
 
 const styles = {
   container: {
+    backgroundColor: '#f7f7f7', // Light grey background
+    minHeight: '100vh',
+  },
+  content: {
     padding: '20px',
   },
   heading: {
     marginBottom: '20px',
+    fontSize: '2rem',
+    color: '#003300', // Dark green color
+    fontWeight: 'bold',
   },
   searchSortContainer: {
     display: 'flex',
@@ -252,17 +291,28 @@ const styles = {
   searchInput: {
     padding: '10px',
     fontSize: '16px',
-    width: '60%',
+    width: '40%',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+  },
+  filterSelect: {
+    padding: '10px',
+    fontSize: '16px',
+    width: '25%',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
   },
   sortSelect: {
     padding: '10px',
     fontSize: '16px',
-    width: '35%',
+    width: '25%',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
   },
   addButton: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: 'rgb(0, 51, 0)', // Dark green button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -272,27 +322,39 @@ const styles = {
   contentContainer: {
     display: 'flex',
     justifyContent: 'space-between',
+    flexWrap: 'wrap', // Allows content to adjust
   },
   taskContainer: {
-    width: '60%',
+    width: '100%', // Full width on small screens
+    maxWidth: '60%', // Max width for larger screens
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '20px',
   },
   analyticsContainer: {
-    width: '35%',
+    width: '100%', // Full width on small screens
+    maxWidth: '35%', // Max width for larger screens
   },
   taskList: {
     listStyleType: 'none',
     padding: 0,
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '20px',
   },
   taskItem: {
-    padding: '10px',
-    marginBottom: '10px',
+    flex: '1 1 300px', // Fixed width for task items
+    maxWidth: '300px', // Ensure task items do not exceed this width
+    padding: '15px',
     border: '1px solid #ccc',
-    borderRadius: '4px',
+    borderRadius: '8px',
+    backgroundColor: '#fff', // White background for tasks
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   submitButton: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#28a745',
+    backgroundColor: 'rgb(0, 51, 0)', // Dark green submit button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -314,14 +376,14 @@ const styles = {
     backgroundColor: 'white',
     padding: '20px',
     borderRadius: '8px',
-    width: '300px',
+    width: '350px',
     textAlign: 'center',
   },
   input: {
     marginBottom: '10px',
     padding: '10px',
     fontSize: '16px',
-    borderRadius: '4px',
+    borderRadius: '5px',
     border: '1px solid #ccc',
     width: '100%',
   },
@@ -329,7 +391,7 @@ const styles = {
     marginBottom: '10px',
     padding: '10px',
     fontSize: '16px',
-    borderRadius: '4px',
+    borderRadius: '5px',
     border: '1px solid #ccc',
     width: '100%',
     height: '100px',
@@ -337,7 +399,7 @@ const styles = {
   button: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: 'rgb(0, 51, 0)', // Dark green button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -360,7 +422,7 @@ const styles = {
     backgroundColor: 'white',
     padding: '20px',
     borderRadius: '8px',
-    width: '300px',
+    width: '350px',
     textAlign: 'center',
   },
 };

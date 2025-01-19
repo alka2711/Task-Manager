@@ -16,7 +16,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "start",
     padding: "10px 20px",
-    backgroundColor: "#333",
+    backgroundColor: "#003300",
     color: "#fff",
   },
   logo: {
