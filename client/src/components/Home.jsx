@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import backgroundImage from '../assets/background.jpg';
 import SimpleNavbar from './SimpleNavbar';
 
 const Home = () => {
@@ -73,25 +72,27 @@ const Home = () => {
 
 const styles = {
   container: {
-    backgroundImage: `url(${backgroundImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundColor: '#fff', // White background
+    color: '#006400', // Dark green text color
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    fontFamily: 'Arial, sans-serif',
   },
   heading: {
     marginBottom: '20px',
     fontSize: '2rem',
+    color: '#006400', // Dark green heading
   },
   paragraph: {
     marginBottom: '20px',
     fontSize: '1.2rem',
+    color: '#333', // Dark gray text for paragraph
   },
   registerBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.53)', // Translucent white background
+    backgroundColor: '#f9f9f9', // Light gray background for the box
     padding: '20px',
     borderRadius: '8px',
     boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
@@ -111,7 +112,7 @@ const styles = {
   button: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#006400', // Dark green button color
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -122,7 +123,7 @@ const styles = {
     textAlign: 'center',
   },
   loginLink: {
-    color: '#007bff',
+    color: '#006400', // Dark green link color
     textDecoration: 'none',
   },
 };

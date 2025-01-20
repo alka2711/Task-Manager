@@ -4,7 +4,7 @@ const User = require('../models/user');
 
 const createAndAssignTask = async (req, res) => {
     try {
-        const { title, description, priority, dueDate, team } = req.body;
+        const { title, description, priority, dueDate, userEmails } = req.body;
         const assignerId = req.user._id;
 
         const assigner = await User.findById(assignerId);
@@ -13,12 +13,21 @@ const createAndAssignTask = async (req, res) => {
             return res.status(404).json({ status: false, message: 'Assigner not found' });
         }
 
+        const emailArray = userEmails.split(',').map(email => email.trim());
+        const users = await User.find({ email: { $in: emailArray } });
+
+        if (users.length !== emailArray.length) {
+            return res.status(404).json({ status: false, message: 'One or more users not found' });
+        }
+
+        const userIds = users.map(user => user._id);
+
         const task = new Task({
             title,
             description,
             priority,
             dueDate,
-            team: [assignerId, ...team]
+            team: [assignerId, ...userIds]
         });
 
         await task.save();

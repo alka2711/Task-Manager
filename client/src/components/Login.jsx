@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import backgroundImage from '../assets/background.jpg'; // Adjust the path if necessary
 import SimpleNavbar from './SimpleNavbar';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,61 +21,59 @@ const Login = () => {
   };
 
   return (
-    
     <div>
-      <SimpleNavbar/>
+      <SimpleNavbar />
       <div style={styles.container}>
-      <h2 style={styles.heading}>Login</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>Login</button>
-      </form>
-      <p style={styles.registerText}>
-        Don't have an account? <Link to="/" style={styles.registerLink}>Register</Link>
-      </p>
-    </div>
+        <h2 style={styles.heading}>Login</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={styles.input}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={styles.input}
+          />
+          <button type="submit" style={styles.button}>Login</button>
+        </form>
+        <p style={styles.registerText}>
+          Don't have an account? <Link to="/" style={styles.registerLink}>Register</Link>
+        </p>
+      </div>
     </div>
   );
 };
 
 const styles = {
   container: {
-    backgroundImage: `url(${backgroundImage})`, // Set the background image
-    backgroundSize: 'cover',                   // Cover the entire container
-    backgroundPosition: 'center',              // Center the image
-    height: '100vh',                           // Full viewport height
+    backgroundColor: '#fff', // White background
+    color: '#006400', // Dark green text color
+    height: '100vh', // Full viewport height
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#333',                             // Text color
+    fontFamily: 'Arial, sans-serif',
   },
   heading: {
     marginBottom: '20px',
     fontSize: '2rem',
-    color: 'white',                            // Make the text stand out on the background
+    color: '#006400', // Dark green heading
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
     width: '300px',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Translucent white background for form
+    backgroundColor: '#f9f9f9', // Light gray background for form
     padding: '20px',
     borderRadius: '8px',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',    // Slight shadow for better visibility
+    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)', // Slight shadow for better visibility
   },
   input: {
     marginBottom: '10px',
@@ -87,7 +85,7 @@ const styles = {
   button: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#006400', // Dark green button color
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -96,10 +94,10 @@ const styles = {
   registerText: {
     marginTop: '10px',
     textAlign: 'center',
-    color: 'white',
+    color: '#006400', // Dark green text for the registration message
   },
   registerLink: {
-    color: '#007bff',
+    color: '#006400', // Dark green link color
     textDecoration: 'none',
   },
 };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Analytics from './Analytics'; // Import the Analytics component
+// import CreateTask from './CreateTask.jsx';
+import CreateAssignTask from './CreateAssignTask.jsx';
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -113,126 +115,80 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div>
       <Navbar />
-      <h2 style={styles.heading}>Dashboard</h2>
-      <div style={styles.searchSortContainer}>
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchTerm}
-          onChange={handleSearch}
-          style={styles.searchInput}
-        />
-        <select value={sortOption} onChange={handleSort} style={styles.sortSelect}>
-          <option value="">Sort by</option>
-          <option value="priority">Priority</option>
-          <option value="status">Status</option>
-        </select>
-      </div>
-      <button onClick={handleAddTask} style={styles.addButton}>Create Task</button>
-      <div style={styles.contentContainer}>
-        <div style={styles.taskContainer}>
-          <ul style={styles.taskList}>
-            {tasks.map((task) => (
-              <li key={task._id} style={styles.taskItem}>
-                <h3>{task.title}</h3>
-                <p>{task.description}</p>
-                <p>Priority: {task.priority}</p>
-                <p>Status: {task.status}</p>
-                <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
-                {task.status !== 'sent for review' && task.status !== 'completed' && (
-                  <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
-                    Submit
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+      <br />
+      <br />
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Dashboard</h2>
+        <div style={styles.searchSortContainer}>
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={handleSearch}
+            style={styles.searchInput}
+          />
+          <select value={sortOption} onChange={handleSort} style={styles.sortSelect}>
+            <option value="">Sort by</option>
+            <option value="priority">Priority</option>
+            <option value="status">Status</option>
+          </select>
         </div>
-        <div style={styles.analyticsContainer}>
-          <Analytics />
+        <div>
+        <button onClick={handleAddTask} style={styles.addButton}>Create Task 
+        </button>
+        {showModal && (
+          <div style={styles.modal}>
+            <div style={styles.modalContent}>
+          <CreateAssignTask  onClose = {handleCloseModal}/> 
+          </div>
+          </div>
+        )}
         </div>
-      </div>
-      {showModal && (
-        <div style={styles.modal}>
-          <div style={styles.modalContent}>
-            <h3>Create Task</h3>
-            <form onSubmit={handleSubmit}>
+        <div style={styles.contentContainer}>
+          <div style={styles.taskContainer}>
+            <ul style={styles.taskList}>
+              {tasks.map((task) => (
+                <li key={task._id} style={styles.taskItem}>
+                  <h3>{task.title}</h3>
+                  <p>{task.description}</p>
+                  <p>Priority: {task.priority}</p>
+                  <p>Status: {task.status}</p>
+                  <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
+                  {task.status !== 'sent for review' && task.status !== 'completed' && (
+                    <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
+                      Submit
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={styles.analyticsContainer}>
+            <Analytics />
+          </div>
+        </div>
+        
+           
+        
+        {showPopup && (
+          <div style={styles.popup}>
+            <div style={styles.popupContent}>
+              <h3>Submit Task</h3>
               <input
                 type="text"
-                name="title"
-                placeholder="Title"
-                value={newTask.title}
-                onChange={handleInputChange}
+                placeholder="Attachment link"
+                value={attachment}
+                onChange={(e) => setAttachment(e.target.value)}
                 style={styles.input}
               />
-              <textarea
-                name="description"
-                placeholder="Description"
-                value={newTask.description}
-                onChange={handleInputChange}
-                style={styles.textarea}
-              />
-              <select
-                name="priority"
-                value={newTask.priority}
-                onChange={handleInputChange}
-                style={styles.input}
-              >
-                <option value="" disabled>Priority</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-              <input
-                type="date"
-                name="dueDate"
-                value={newTask.dueDate}
-                onChange={handleInputChange}
-                style={styles.input}
-              />
-              <select
-                name="assignTo"
-                value={newTask.assignTo}
-                onChange={handleInputChange}
-                style={styles.input}
-              >
-                <option value="self">Assign to Self</option>
-                <option value="others">Assign to Others</option>
-              </select>
-              {newTask.assignTo === 'others' && (
-                <input
-                  type="text"
-                  name="userIds"
-                  placeholder="Enter User IDs (comma separated)"
-                  value={newTask.userIds}
-                  onChange={handleInputChange}
-                  style={styles.input}
-                />
-              )}
-              <button type="submit" style={styles.button}>Create</button>
-              <button type="button" onClick={handleCloseModal} style={styles.button}>Close</button>
-            </form>
+              <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
+              <button onClick={handleClosePopup} style={styles.button}>Close</button>
+            </div>
           </div>
-        </div>
-      )}
-      {showPopup && (
-        <div style={styles.popup}>
-          <div style={styles.popupContent}>
-            <h3>Submit Task</h3>
-            <input
-              type="text"
-              placeholder="Attachment link"
-              value={attachment}
-              onChange={(e) => setAttachment(e.target.value)}
-              style={styles.input}
-            />
-            <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
-            <button onClick={handleClosePopup} style={styles.button}>Close</button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
@@ -240,8 +196,10 @@ const Dashboard = () => {
 const styles = {
   container: {
     padding: '20px',
+    
   },
   heading: {
+    
     marginBottom: '20px',
   },
   searchSortContainer: {
@@ -262,7 +220,7 @@ const styles = {
   addButton: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#003000', // Dark green button color
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -292,58 +250,39 @@ const styles = {
   submitButton: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#28a745',
+    backgroundColor: '#003000', // Dark green button color
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
     marginTop: '10px',
   },
-  modal: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    width: '300px',
-    textAlign: 'center',
-  },
+  
   input: {
-    marginBottom: '10px',
+    width: '100%',
     padding: '10px',
     fontSize: '16px',
+    marginBottom: '10px',
     borderRadius: '4px',
     border: '1px solid #ccc',
-    width: '100%',
   },
   textarea: {
-    marginBottom: '10px',
+    width: '100%',
     padding: '10px',
     fontSize: '16px',
+    marginBottom: '10px',
     borderRadius: '4px',
     border: '1px solid #ccc',
-    width: '100%',
     height: '100px',
   },
   button: {
     padding: '10px',
     fontSize: '16px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#003000', // Dark green button color
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
-    marginTop: '10px',
-    marginRight: '10px',
   },
   popup: {
     position: 'fixed',
@@ -360,8 +299,7 @@ const styles = {
     backgroundColor: 'white',
     padding: '20px',
     borderRadius: '8px',
-    width: '300px',
-    textAlign: 'center',
+    width: '400px',
   },
 };
 

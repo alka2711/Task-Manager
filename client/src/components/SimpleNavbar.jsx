@@ -12,12 +12,15 @@ const Navbar = () => {
 
 const styles = {
   navbar: {
+    position: "fixed",
+    width: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "start",
     padding: "10px 20px",
-    backgroundColor: "#333",
+    backgroundColor: "#003000", // Dark green background
     color: "#fff",
+    margin: "0"
   },
   logo: {
     display: "flex",

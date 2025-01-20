@@ -10,6 +10,7 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState("");
+  const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
 
   const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
@@ -18,31 +19,43 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/notifications");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch notifications");
+        try {
+          setLoading(true);
+          const response = await fetch("/api/notifs/notifications");
+      
+          if (!response.ok) {
+            throw new Error("Failed to fetch notifications");
+          }
+      
+          const data = await response.json();
+          console.log(data); // Debug: Check the structure of the response
+      
+          // If the response is an object with a notifications array
+          const notificationsArray = Array.isArray(data) ? data : data.notifications;
+      
+          if (!Array.isArray(notificationsArray)) {
+            throw new Error("Unexpected response format: notifications should be an array");
+          }
+      
+          setNotifications(notificationsArray);
+      
+          // Identify the latest notification
+          const latestNotification = notificationsArray[0]; // Assuming the latest is at the beginning
+      
+          if (latestNotification) {
+            toast.info(`${latestNotification.title}`);
+          }
+        } catch (err) {
+          setError(err.message);
+          toast.error(`Error: ${err.message}`);
+        } finally {
+          setLoading(false);
         }
-
-        const data = await response.json();
-        setNotifications(data);
-
-        // Display a toast for each notification
-        data.forEach((notification) => {
-          toast.info(`New Notification: ${notification.message}`);
-        });
-      } catch (err) {
-        setError(err.message);
-        toast.error(`Error: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNotifications();
-
+      };
+      
+      fetchNotifications();
+      
+      
     const handleClickOutside = (event) => {
       if (
         !dropdownRef.current?.contains(event.target) &&
@@ -78,6 +91,30 @@ const Navbar = () => {
     setIsUserDropdownVisible((prev) => !prev);
   };
 
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      const response = await fetch(`/api/notis/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notificationId }), // Sending notificationId as the body
+      });
+  
+      const data = await response.json();
+  
+      if (data.status) {
+        // Successfully marked as read, update the UI accordingly
+        console.log(data.message);
+        // Optionally, update the notifications state to reflect the change (e.g., mark as read, remove, or update)
+      } else {
+        console.error('Failed to mark notification as read:', data.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+  
   const handleLogout = async () => {
     try {
       toast.info("Logging out...");
@@ -109,8 +146,13 @@ const Navbar = () => {
     setIsDropdownVisible((prev) => !prev);
   };
 
+  const toggleSideMenu = () => {
+    setIsSideMenuVisible((prev) => !prev);
+  };
+
   return (
     <nav style={styles.navbar}>
+      <span style={styles.menuBar} onClick={toggleSideMenu}>=</span> 
       <div style={styles.logo}>
         <span style={styles.logoText}>TASKMASTER</span>
       </div>
@@ -125,26 +167,37 @@ const Navbar = () => {
         </span>
         <ToastContainer />
         {isDropdownVisible && (
-          <div ref={dropdownRef} style={styles.dropdown}>
-            {loading ? (
-              <p>Loading notifications...</p>
-            ) : error ? (
-              <p>Error: {error}</p>
-            ) : notifications.length === 0 ? (
-              <p>No new notifications</p>
-            ) : (
-              notifications.map((notification) => (
-                <p
-                  key={notification.id}
-                  style={styles.dropdownItem}
-                  onClick={() => handleNotificationClick(notification.message)}
-                >
-                  {notification.message}
-                </p>
-              ))
-            )}
-          </div>
-        )}
+  <div ref={dropdownRef} style={styles.dropdown}>
+    {loading ? (
+      <p>Loading notifications...</p>
+    ) : error ? (
+      <p>Error: {error}</p>
+    ) : notifications.length === 0 ? (
+      <p>No new notifications</p>
+    ) : (
+      notifications.map((notification) => (
+        <div key={notification.id} style={styles.notificationItem}>
+          <p
+            style={styles.dropdownItem}
+            onClick={() => handleNotificationClick(notification.title, notification.text)}
+          >
+            {notification.title}
+            <br />
+            {notification.text}
+          </p>
+          <button
+            style={styles.markAsReadButton}
+            onClick={() => handleMarkAsRead(notification.id)}
+          >
+            Mark as Read
+          </button>
+        </div>
+      ))
+    )}
+  </div>
+)}
+
+
 
         {/* User Icon */}
         <span
@@ -181,18 +234,36 @@ const Navbar = () => {
           </div>
         </div>
       )}
+      {isSideMenuVisible && (
+        <div style={styles.sideMenu}>
+          <ul>
+            <p>Home</p>
+            <br />
+            <p>Dashboard</p>
+            <br />
+            <p>Profile</p>
+          </ul>
+        </div>
+      )}
     </nav>
   );
 };
 
 const styles = {
   navbar: {
+    position: "fixed",
+    width: "100%",
+    height: "7%",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    margin: "0",
     padding: "10px 20px",
-    backgroundColor: "black",
+    backgroundColor: "#003000",
     color: "#fff",
+  },
+  menuBar: {
+    cursor: 'pointer',
   },
   logo: {
     display: "flex",
@@ -214,6 +285,7 @@ const styles = {
   },
   dropdown: {
     backgroundColor: "#fff",
+    color: "black",
     padding: "10px",
     position: "absolute",
     top: "40px",
@@ -236,10 +308,23 @@ const styles = {
     zIndex: 1000,
   },
   dropdownItem: {
-    padding: "8px 10px",
+    padding: "10px",
     cursor: "pointer",
-    borderBottom: "1px solid #ccc",
+    wordWrap: "breakWord",
+    whiteSpace: "normal",
+    color: "black",
   },
+
+  markAsReadButton: {
+    padding: '5px 10px',
+    marginTop: '5px',
+    backgroundColor: 'blue', // Green button color
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  
   button: {
     padding: "8px 16px",
     backgroundColor: "#007BFF",
@@ -267,6 +352,18 @@ const styles = {
     padding: "20px",
     borderRadius: "10px",
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+  sideMenu: {
+    position: 'fixed',
+    top: '5%',
+    left: 0,
+    width: '10%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 48, 0)',
+    color: '#fff',
+    padding: '30px',
+    boxShadow: '2px 0 5px rgba(0,0,0,0.5)',
+    zIndex: 1000,
   },
 };
 
