@@ -149,8 +149,9 @@ const LandingPage = () => {
             <div style={styles.sectionsContainer}>
                 <div style={styles.section}>
                     <div style={styles.content}>
-                        <h1 style={styles.heading}>Work for Yourself</h1>
-                        <p style={styles.paragraph}>Manage your personal tasks and boost your productivity</p>
+                    <h1 style={styles.heading}>Exclusive Space</h1>
+                    <p style={styles.paragraph}>Manage your tasks and assign tasks to up to one user, working together to achieve your goals.</p>
+
                         <Link to="/MyTasks" style={styles.ctaButton}>
                             Get Started
                         </Link>
@@ -159,7 +160,7 @@ const LandingPage = () => {
 
                 <div style={styles.section}>
                     <div style={styles.content}>
-                        <h1 style={styles.heading}>Join/Create a Team</h1>
+                        <h1 style={styles.heading}>Collaborative Space</h1>
                         <p style={styles.paragraph}>Collaborate with others and achieve goals together</p>
                         <div style={styles.buttonContainer}>
                             <button onClick={handleJoinTeamClick} style={styles.ctaButton}>
