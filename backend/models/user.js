@@ -8,6 +8,7 @@ const userSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, minlength: 8, required: true },
     tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+    team: { type: Schema.Types.ObjectId, ref: 'Team' },
 }, { timestamps: true });
 
 // Method to compare plain text password with hashed password

@@ -6,6 +6,7 @@ const { dbConnection } = require("./utils/index.js");
 const userRoutes = require('./routes/userRoutes.js');
 const taskRoutes = require('./routes/taskRoutes.js');
 const notifsRoutes = require('./routes/notifsRoutes.js');
+const teamRoutes = require('./routes/teamRoutes.js');
 
 dotenv.config();
 
@@ -24,5 +25,6 @@ app.use(cookieParser());
 app.use('/api/user', userRoutes);
 app.use('/api/task', taskRoutes);
 app.use('/api/notifs', notifsRoutes);
+app.use('/api/team', teamRoutes); 
 
 app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));

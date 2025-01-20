@@ -122,17 +122,22 @@ const dashboardStatistics = async (req, res) => {
     try {
         const userId = req.user._id;
 
+        // Fetch all tasks where the user is in the team but not at the 0th index
         const allTasks = await Task.find({
+            "team.0": { $ne: userId },
             team: userId,
+             // Ensure the user is not at the 0th index
         })
             .populate({ path: "team", select: "name role title email" })
             .sort({ _id: -1 });
 
+        // Fetch active users
         const users = await User.find({ isActive: true })
             .select("name title role createdAt")
             .limit(10)
             .sort({ _id: -1 });
 
+        // Group tasks by their status
         const groupTasksByStatus = allTasks.reduce((result, task) => {
             const status = task.status;
 
@@ -145,6 +150,7 @@ const dashboardStatistics = async (req, res) => {
             return result;
         }, {});
 
+        // Group tasks by their priority for graph data
         const groupData = Object.entries(
             allTasks.reduce((result, task) => {
                 const { priority } = task;
@@ -154,6 +160,7 @@ const dashboardStatistics = async (req, res) => {
             }, {})
         ).map(([name, total]) => ({ name, total }));
 
+        // Prepare summary
         const totalTasks = allTasks.length;
         const last10Tasks = allTasks.slice(0, 10);
 
@@ -165,6 +172,7 @@ const dashboardStatistics = async (req, res) => {
             graphData: groupData,
         };
 
+        // Return the response
         res.status(200).json({
             status: true,
             message: "Successfully retrieved statistics",
@@ -176,11 +184,13 @@ const dashboardStatistics = async (req, res) => {
     }
 };
 
+
 const getTasks = async (req, res) => {
     try {
         const { search, sort } = req.query;
         const userId = req.user._id; // Get the logged-in user's ID
         let query = {
+            "team.0": { $ne: userId },
             team: userId, // Include only tasks where the user is part of the team
         };
 

@@ -20,6 +20,21 @@ const Dashboard = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [attachment, setAttachment] = useState('');
+  const [loggedInUser, setLoggedInUser] = useState(null);
+
+  useEffect(() => {
+    const fetchLoggedInUser = async () => {
+      try {
+        // Example: Fetch user details from session or API
+        const user = await axios.get('/api/auth/user'); // Adjust endpoint to your backend
+        setLoggedInUser(user.data.email);
+      } catch (error) {
+        console.error('Error fetching logged-in user:', error);
+      }
+    };
+
+    fetchLoggedInUser();
+  }, []);
 
   useEffect(() => {
     const fetchTasks = async () => {
