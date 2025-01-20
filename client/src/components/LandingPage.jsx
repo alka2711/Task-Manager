@@ -151,7 +151,7 @@ const LandingPage = () => {
                     <div style={styles.content}>
                         <h1 style={styles.heading}>Work for Yourself</h1>
                         <p style={styles.paragraph}>Manage your personal tasks and boost your productivity</p>
-                        <Link to="/dashboard" style={styles.ctaButton}>
+                        <Link to="/MyTasks" style={styles.ctaButton}>
                             Get Started
                         </Link>
                     </div>

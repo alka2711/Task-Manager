@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -151,7 +152,7 @@ const Navbar = () => {
 
   return (
     <nav style={styles.navbar}>
-      <span style={styles.menuBar} onClick={toggleSideMenu}>=</span> 
+      <span style={styles.menuBar} onClick={toggleSideMenu}>&#9776;</span> 
       <div style={styles.logo}>
         <span style={styles.logoText}>TASKMASTER</span>
       </div>
@@ -235,13 +236,33 @@ const Navbar = () => {
       )}
       {isSideMenuVisible && (
         <div style={styles.sideMenu}>
-          <ul>
-            <p>Home</p>
-            <br />
-            <p>Dashboard</p>
-            <br />
-            <p>Profile</p>
-          </ul>
+          <div>
+            <div>
+              <Link to="/LandingPage" style={styles.link}>
+                Home
+              </Link>
+            </div>
+            <div>
+              <Link to="/Dashboard" style={styles.link}>
+                Dashboard
+              </Link>
+            </div>
+            <div>
+              <Link to="/MyTasks" style={styles.link}>
+                My Tasks
+              </Link>
+            </div>
+            <div>
+              <Link to="/MyTeams" style={styles.link}>
+                My Teams
+              </Link>
+            </div>
+            <div>
+              <Link to="/Profile" style={styles.link}>
+                Profile
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </nav>
@@ -356,13 +377,24 @@ const styles = {
     position: 'fixed',
     top: '5%',
     left: 0,
-    width: '10%',
+    width: '15%',
     height: '100%',
     backgroundColor: 'rgba(0, 48, 0)',
     color: '#fff',
     padding: '30px',
-    boxShadow: '2px 0 5px rgba(0,0,0,0.5)',
     zIndex: 1000,
+  },
+  link: {
+    color: 'rgba(0, 48, 0)',
+    textDecoration: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '10px',
+    margin: '30px 0',
+    borderRadius: '5px',
+    backgroundColor:'#f7f7f7',
+    
   },
 };
 
