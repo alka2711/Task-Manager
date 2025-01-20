@@ -42,7 +42,7 @@ const Analytics = () => {
   ];
 
   const chartOptions = {
-    title: 'Task Calendar for 2025',
+    // title: 'Task Calendar for 2025',
     calendar: {
       cellSize: 10,
       yearLabel: {
@@ -88,7 +88,7 @@ const Analytics = () => {
   ];
 
   const pieOptions = {
-    title: 'Task Completion Status',
+    // title: 'Task Completion Status',
     pieHole: 0.4,
     slices: [
       { color: '#ffce56' }, // Yellow for pending

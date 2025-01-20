@@ -72,8 +72,9 @@ const Home = () => {
 
 const styles = {
   container: {
-    backgroundColor: '#fff', // White background
+    // backgroundColor: '#fff', // White background
     color: '#006400', // Dark green text color
+    backgroundColor: '#f7f7f7',  // Light grey background for the whole page
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
@@ -83,48 +84,57 @@ const styles = {
   },
   heading: {
     marginBottom: '20px',
-    fontSize: '2rem',
-    color: '#006400', // Dark green heading
+    fontSize: '2.5rem',
+    color: '#003300',  // Green color for heading
+    fontWeight: 'bold',
   },
   paragraph: {
-    marginBottom: '20px',
+    marginBottom: '30px',
     fontSize: '1.2rem',
-    color: '#333', // Dark gray text for paragraph
+    color: '#333',
   },
   registerBox: {
-    backgroundColor: '#f9f9f9', // Light gray background for the box
-    padding: '20px',
+    backgroundColor: '#ffffff', // White background for the registration box
+    padding: '40px 30px',
     borderRadius: '8px',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-    width: '300px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    width: '350px',
+    textAlign: 'center',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
   },
   input: {
-    marginBottom: '10px',
-    padding: '10px',
+    marginBottom: '15px',
+    padding: '15px',  // Increased padding for bigger input fields
     fontSize: '16px',
     borderRadius: '4px',
     border: '1px solid #ccc',
+    transition: 'border-color 0.3s',
+    width: '100%',  // Ensures input fields take up the full width of the container
   },
   button: {
-    padding: '10px',
+    padding: '12px',
     fontSize: '16px',
-    backgroundColor: '#006400', // Dark green button color
+    backgroundColor: '#003300',  // Darker green background for the button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+    transition: 'background-color 0.3s',
   },
+  
   loginText: {
-    marginTop: '10px',
+    marginTop: '15px',
     textAlign: 'center',
+    fontSize: '1rem',
+    color: '#555',
   },
   loginLink: {
-    color: '#006400', // Dark green link color
+    color: '#2d6a4f',  // Green color for the login link
     textDecoration: 'none',
+    fontWeight: 'bold',
   },
 };
 

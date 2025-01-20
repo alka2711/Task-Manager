@@ -18,7 +18,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "start",
     padding: "10px 20px",
-    backgroundColor: "#003000", // Dark green background
+    backgroundColor: "#003300",
     color: "#fff",
     margin: "0"
   },

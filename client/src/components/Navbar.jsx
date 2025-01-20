@@ -140,7 +140,6 @@ const Navbar = () => {
       toast.error(`Logout failed: ${error.message}`);
     }
   };
-  
 
   const toggleNotifications = () => {
     setIsDropdownVisible((prev) => !prev);
@@ -259,7 +258,7 @@ const styles = {
     justifyContent: "space-between",
     margin: "0",
     padding: "10px 20px",
-    backgroundColor: "#003000",
+    backgroundColor: "#003300", // Dark green color
     color: "#fff",
   },
   menuBar: {

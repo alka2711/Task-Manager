@@ -52,9 +52,8 @@ const Login = () => {
 
 const styles = {
   container: {
-    backgroundColor: '#fff', // White background
-    color: '#006400', // Dark green text color
-    height: '100vh', // Full viewport height
+    backgroundColor: '#f7f7f7',  // Light grey background
+    height: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -63,42 +62,49 @@ const styles = {
   },
   heading: {
     marginBottom: '20px',
-    fontSize: '2rem',
-    color: '#006400', // Dark green heading
+    fontSize: '2.5rem',
+    color: '#003300',  // Green color for heading
+    fontWeight: 'bold',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    width: '300px',
-    backgroundColor: '#f9f9f9', // Light gray background for form
-    padding: '20px',
+    width: '350px',
+    backgroundColor: '#ffffff',  // White background for form
+    padding: '40px 30px',
     borderRadius: '8px',
-    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)', // Slight shadow for better visibility
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
   },
   input: {
-    marginBottom: '10px',
-    padding: '10px',
+    marginBottom: '15px',
+    padding: '15px',
     fontSize: '16px',
     borderRadius: '4px',
     border: '1px solid #ccc',
+    width: '100%',  // Full width input
   },
   button: {
-    padding: '10px',
+    padding: '12px',
     fontSize: '16px',
-    backgroundColor: '#006400', // Dark green button color
+    backgroundColor: '#003300',  // Green background for the button
     color: 'white',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+    transition: 'background-color 0.3s',
   },
+  
   registerText: {
-    marginTop: '10px',
+    marginTop: '15px',
     textAlign: 'center',
-    color: '#006400', // Dark green text for the registration message
+    fontSize: '1rem',
+    color: '#555',
   },
   registerLink: {
-    color: '#006400', // Dark green link color
+    color: '#2d6a4f',  // Green color for the register link
     textDecoration: 'none',
+    fontWeight: 'bold',
   },
 };
 
