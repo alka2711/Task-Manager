@@ -13,7 +13,7 @@ const Login = () => {
     try {
       const { data } = await axios.post('/api/user/login', { email, password });
       localStorage.setItem('userInfo', JSON.stringify(data));
-      navigate('/dashboard');
+      navigate('/LandingPage');
     } catch (error) {
       console.error(error);
       alert('Invalid email or password');

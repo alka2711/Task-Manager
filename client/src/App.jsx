@@ -6,6 +6,7 @@ import MyTasks from './components/MyTasks';
 import Analytics from './components/Analytics';
 import Login from './components/Login';
 import './App.css';
+import LandingPage from './components/LandingPage';
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/tasks" element={<MyTasks />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/LandingPage" element={<LandingPage />} />
         </Routes>
       </div>
     </Router>
