@@ -275,7 +275,6 @@ const styles = {
     width: "100%",
     height: "7%",
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
     margin: "0",
     padding: "10px 20px",
@@ -293,6 +292,7 @@ const styles = {
     fontSize: "22px",
     fontWeight: "bold",
     color: "#fff",
+   
   },
   icons: {
     display: "flex",
