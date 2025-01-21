@@ -84,6 +84,7 @@ const styles = {
   },
   heading: {
     marginBottom: '20px',
+    marginTop: '3%',
     fontSize: '2.5rem',
     color: '#003300',  // Green color for heading
     fontWeight: 'bold',

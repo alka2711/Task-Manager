@@ -26,7 +26,7 @@ const MyTasks = () => {
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
-        const user = await axios.get('/api/auth/user');
+        // const user = await axios.get('/api/user');
         setLoggedInUser(user.data.email);
       } catch (error) {
         console.error('Error fetching logged-in user:', error);
@@ -126,14 +126,6 @@ const MyTasks = () => {
   const filteredAndSortedTasks = sortTasks(
     tasks
       .filter((task) => !statusFilter || task.status === statusFilter)
-      .filter((task) => {
-        if (taskTypeFilter === 'personal') {
-          return task.team.length === 1;
-        } else if (taskTypeFilter === 'assigned') {
-          return task.team.length > 1;
-        }
-        return true;
-      })
   );
 
   return (
@@ -141,7 +133,8 @@ const MyTasks = () => {
       <Navbar />
       <div style={styles.container}>
         <div style={styles.content}>
-          <h2 style={styles.heading}>My Tasks</h2>
+          <h2 style={styles.heading}>Tasks</h2>
+          <h3 >Assigned to Me</h3>
           <div style={styles.searchSortContainer}>
             <input
               type="text"
@@ -161,11 +154,7 @@ const MyTasks = () => {
               <option value="priority">Priority</option>
               <option value="dueDate">Due Date</option>
             </select>
-            <select value={taskTypeFilter} onChange={handleTaskTypeFilter} style={styles.filterSelect}>
-              <option value="">Filter by Task Type</option>
-              <option value="personal">Personal Tasks</option>
-              <option value="assigned">Assigned Tasks</option>
-            </select>
+           
           </div>
           <div>
             <button onClick={handleAddTask} style={styles.addButton}>Create Task</button>
@@ -279,6 +268,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     marginBottom: '20px',
+    marginTop: '20px',
   },
   searchInput: {
     padding: '10px',

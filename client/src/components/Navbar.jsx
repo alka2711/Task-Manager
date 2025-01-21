@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faUser } from '@fortawesome/free-solid-svg-icons';
 import { height, width } from "@fortawesome/free-solid-svg-icons/fa0";
+// import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 
 const Navbar = () => {
@@ -251,11 +253,17 @@ const Navbar = () => {
                 Dashboard
               </Link>
             </div>
-            <div>
-              <Link to="/MyTasks" style={styles.link}>
-                My Tasks
+            <details>
+              <summary style={styles.link}> Tasks</summary>
+              <p>
+              <Link to="/MyTasks" style={styles.tasklink}>
+                Assigned to Me
               </Link>
-            </div>
+              <Link to="/TasksByMe" style={styles.tasklink}>
+                Assigned by Me
+              </Link>
+              </p>
+            </details>
             <div>
               <Link to="/MyTeams" style={styles.link}>
                 My Teams
@@ -393,16 +401,31 @@ const styles = {
     zIndex: 1000,
   },
   link: {
-    color: 'rgba(0, 48, 0)',
+    // color: 'rgba(0, 48, 0)',
+    color: '#fff',
     textDecoration: 'none',
     display: 'flex',
-    alignItems: 'center',
+    // alignItems: 'center',
     justifyContent: 'center',
     padding: '10px',
     margin: '30px 0',
     borderRadius: '5px',
-    backgroundColor:'#f7f7f7',
+    // backgroundColor:'#f7f7f7',
     
+  },
+  tasklink: {
+    // color: 'rgba(0, 48, 0)',
+    color: '#fff',
+    textDecoration: 'none',
+    listStyleType: 'bullet',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '5px',
+    margin: '30px 0',
+    marginLeft: '20px',
+    borderRadius: '5px',
+    // backgroundColor:'#f7f7f7',
   },
 };
 

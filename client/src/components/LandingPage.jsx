@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import Navbar from './Navbar'; // Import the Navbar component
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
     const [showJoinTeamPopup, setShowJoinTeamPopup] = useState(false);
     const [showCreateTeamPopup, setShowCreateTeamPopup] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [teamMembers, setTeamMembers] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const navigate = useNavigate();
 
     const handleJoinTeamClick = () => {
         setShowJoinTeamPopup(true);
-        
     };
 
     const handleCreateTeamClick = () => {
@@ -20,158 +24,45 @@ const LandingPage = () => {
     const handleClosePopup = () => {
         setShowJoinTeamPopup(false);
         setShowCreateTeamPopup(false);
+        setErrorMessage('');
+        setSuccessMessage('');
     };
 
-    
     const handleJoinTeam = async () => {
         try {
-            // Make an API call to search for the team with the entered name
-            const response = await axios.get(`/api/teams/search?name=${teamName}`);
-            if (response.data.team) {
-                // If the team is found, join the team
-                console.log(`Joining team: ${teamName}`);
-                // Make another API call to join the team
-                await axios.post(`/api/teams/join`, { teamName });
-                setShowJoinTeamPopup(false);
-                navigate('/my-teams');
-            } else {
-                // If the team is not found, alert the user
-                alert('Team not found');
-            }
+            const response = await axios.post('/api/team/join', {
+                teamName
+            }, {
+                withCredentials: true
+            });
+
+            setSuccessMessage(response.data.message);
+            setTimeout(() => {
+                handleClosePopup();
+                navigate('/MyTeams');
+            }, 2000);
         } catch (error) {
-            console.error('Error joining team:', error);
-            alert('An error occurred while trying to join the team');
+            setErrorMessage(error.response?.data?.message || 'Failed to join team');
         }
     };
 
     const handleCreateTeam = async () => {
         try {
-            // Make an API call to create a new team with the entered name and members
-            const response = await axios.post(`/api/teams/create`, {
+            const response = await axios.post('/api/team/create', {
                 name: teamName,
-                userEmails: teamMembers.split(',').map(email => email.trim()),
+                userEmails: teamMembers
+            }, {
+                withCredentials: true
             });
-            if (response.data.success) {
-                // If the team is created successfully, navigate to my-teams
-                console.log(`Creating team: ${teamName} with members: ${teamMembers}`);
-                setShowCreateTeamPopup(false);
-                navigate('/my-teams');
-            } else {
-                // If the team is not created, alert the user
-                alert('Failed to create team');
-            }
-        } catch (error) {
-            console.error('Error creating team:', error);
-            alert('An error occurred while trying to create the team');
-        }
-    };
 
-    const styles = {
-        landingContainer: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            backgroundColor: '#f7f7f7',
-            fontFamily: 'Arial, sans-serif',
-            paddingTop: '60px',
-        },
-        navbarContainer: {
-            width: '100%',
-            position: 'fixed',
-            top: 0,
-            zIndex: 1000,
-        },
-        sectionsContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            marginTop: '20px',
-            flexWrap: 'wrap', // Allow sections to wrap on smaller screens
-        },
-        section: {
-            flex: '0 0 40%',
-            padding: '20px 10px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-            minHeight: '50vh',
-            backgroundColor: '#ffffff',
-            margin: '10px',
-            borderRadius: '10px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        },
-        content: {
-            maxWidth: '300px',
-        },
-        heading: {
-            fontSize: '2rem',
-            color: '#003300',
-            marginBottom: '15px',
-        },
-        paragraph: {
-            fontSize: '1rem',
-            color: '#555',
-            marginBottom: '20px',
-        },
-        buttonContainer: {
-            display: 'flex',
-            flexDirection: 'column', // Change to column to stack buttons vertically
-            alignItems: 'center',
-            gap: '10px', // Add spacing between buttons
-            marginTop: '10px',
-        },
-        ctaButton: {
-            padding: '10px 20px',
-            fontSize: '1rem',
-            color: 'white',
-            backgroundColor: '#003300',
-            border: 'none',
-            borderRadius: '5px',
-            textDecoration: 'none',
-            transition: 'background-color 0.3s',
-        },
-        popupOverlay: {
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1001,
-        },
-        popup: {
-            backgroundColor: '#fff',
-            padding: '20px',
-            borderRadius: '10px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            textAlign: 'center',
-        },
-        input: {
-            padding: '10px',
-            margin: '10px 0',
-            width: '100%',
-            borderRadius: '5px',
-            border: '1px solid #ccc',
-        },
-        popupButton: {
-            padding: '10px 20px',
-            fontSize: '1rem',
-            color: 'white',
-            backgroundColor: '#003300',
-            border: 'none',
-            borderRadius: '5px',
-            textDecoration: 'none',
-            transition: 'background-color 0.3s',
-            margin: '10px 5px',
-        },
+            setSuccessMessage(response.data.message);
+            setTimeout(() => {
+                handleClosePopup();
+                navigate('/MyTeams');
+            }, 2000);
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'Failed to create team');
+        }
     };
 
     return (
@@ -182,8 +73,8 @@ const LandingPage = () => {
             <div style={styles.sectionsContainer}>
                 <div style={styles.section}>
                     <div style={styles.content}>
-                    <h1 style={styles.heading}>Exclusive Space</h1>
-                    <p style={styles.paragraph}>Manage your tasks and assign tasks to up to one user, working together to achieve your goals.</p>
+                        <h1 style={styles.heading}>Exclusive Space</h1>
+                        <p style={styles.paragraph}>Manage your tasks and assign tasks to up to one user, working together to achieve your goals.</p>
 
                         <Link to="/MyTasks" style={styles.ctaButton}>
                             Get Started
@@ -218,6 +109,8 @@ const LandingPage = () => {
                             onChange={(e) => setTeamName(e.target.value)}
                             style={styles.input}
                         />
+                        {errorMessage && <p style={styles.error}>{errorMessage}</p>}
+                        {successMessage && <p style={styles.success}>{successMessage}</p>}
                         <button onClick={handleJoinTeam} style={styles.popupButton}>
                             Join
                         </button>
@@ -246,6 +139,8 @@ const LandingPage = () => {
                             onChange={(e) => setTeamMembers(e.target.value)}
                             style={styles.input}
                         />
+                        {errorMessage && <p style={styles.error}>{errorMessage}</p>}
+                        {successMessage && <p style={styles.success}>{successMessage}</p>}
                         <button onClick={handleCreateTeam} style={styles.popupButton}>
                             Create
                         </button>
@@ -257,6 +152,114 @@ const LandingPage = () => {
             )}
         </div>
     );
+};
+
+const styles = {
+    landingContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f7f7f7',
+        fontFamily: 'Arial, sans-serif',
+        paddingTop: '60px',
+    },
+    navbarContainer: {
+        width: '100%',
+        position: 'fixed',
+        top: 0,
+        zIndex: 1000,
+    },
+    sectionsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        marginTop: '20px',
+        flexWrap: 'wrap', // Allow sections to wrap on smaller screens
+    },
+    section: {
+        flex: '0 0 40%',
+        padding: '20px 10px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+        minHeight: '50vh',
+        backgroundColor: '#ffffff',
+        margin: '10px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    },
+    content: {
+        maxWidth: '300px',
+    },
+    heading: {
+        fontSize: '2rem',
+        color: '#003300',
+        marginBottom: '15px',
+    },
+    paragraph: {
+        fontSize: '1rem',
+        color: '#555',
+        marginBottom: '20px',
+    },
+    buttonContainer: {
+        display: 'flex',
+        flexDirection: 'column', // Change to column to stack buttons vertically
+        alignItems: 'center',
+        gap: '10px', // Add spacing between buttons
+        marginTop: '10px',
+    },
+    ctaButton: {
+        padding: '10px 20px',
+        fontSize: '1rem',
+        color: 'white',
+        backgroundColor: '#003300',
+        border: 'none',
+        borderRadius: '5px',
+        textDecoration: 'none',
+        transition: 'background-color 0.3s',
+    },
+    popupOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1001,
+    },
+    popup: {
+        backgroundColor: '#fff',
+        padding: '20px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
+    },
+    input: {
+        padding: '10px',
+        margin: '10px 0',
+        width: '100%',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+    },
+    popupButton: {
+        padding: '10px 20px',
+        fontSize: '1rem',
+        color: 'white',
+        backgroundColor: '#003300',
+        border: 'none',
+        borderRadius: '5px',
+        textDecoration: 'none',
+        transition: 'background-color 0.3s',
+        margin: '10px 5px',
+    },
 };
 
 export default LandingPage;
