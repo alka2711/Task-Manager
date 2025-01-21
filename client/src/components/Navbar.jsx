@@ -297,6 +297,7 @@ const styles = {
     fontSize: "22px",
     fontWeight: "bold",
     color: "#fff",
+   
   },
   icons: {
     display: "flex",

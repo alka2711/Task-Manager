@@ -10,6 +10,7 @@ const LandingPage = () => {
 
     const handleJoinTeamClick = () => {
         setShowJoinTeamPopup(true);
+        
     };
 
     const handleCreateTeamClick = () => {
@@ -21,16 +22,48 @@ const LandingPage = () => {
         setShowCreateTeamPopup(false);
     };
 
-    const handleJoinTeam = () => {
-        // Handle the join team logic here
-        console.log(`Joining team: ${teamName}`);
-        setShowJoinTeamPopup(false);
+    
+    const handleJoinTeam = async () => {
+        try {
+            // Make an API call to search for the team with the entered name
+            const response = await axios.get(`/api/teams/search?name=${teamName}`);
+            if (response.data.team) {
+                // If the team is found, join the team
+                console.log(`Joining team: ${teamName}`);
+                // Make another API call to join the team
+                await axios.post(`/api/teams/join`, { teamName });
+                setShowJoinTeamPopup(false);
+                navigate('/my-teams');
+            } else {
+                // If the team is not found, alert the user
+                alert('Team not found');
+            }
+        } catch (error) {
+            console.error('Error joining team:', error);
+            alert('An error occurred while trying to join the team');
+        }
     };
 
-    const handleCreateTeam = () => {
-        // Handle the create team logic here
-        console.log(`Creating team: ${teamName} with members: ${teamMembers}`);
-        setShowCreateTeamPopup(false);
+    const handleCreateTeam = async () => {
+        try {
+            // Make an API call to create a new team with the entered name and members
+            const response = await axios.post(`/api/teams/create`, {
+                name: teamName,
+                userEmails: teamMembers.split(',').map(email => email.trim()),
+            });
+            if (response.data.success) {
+                // If the team is created successfully, navigate to my-teams
+                console.log(`Creating team: ${teamName} with members: ${teamMembers}`);
+                setShowCreateTeamPopup(false);
+                navigate('/my-teams');
+            } else {
+                // If the team is not created, alert the user
+                alert('Failed to create team');
+            }
+        } catch (error) {
+            console.error('Error creating team:', error);
+            alert('An error occurred while trying to create the team');
+        }
     };
 
     const styles = {
