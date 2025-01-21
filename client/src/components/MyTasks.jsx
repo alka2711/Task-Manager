@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
+import CreateAssignTask from './CreateAssignTask.jsx';
 
 const MyTasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -72,48 +73,6 @@ const MyTasks = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTask((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleAssigneeChange = (e) => {
-    const { value } = e.target;
-    setAssignee(value);
-    if (value === 'self') {
-      setNewTask((prev) => ({
-        ...prev,
-        userEmails: loggedInUser,
-      }));
-    } else {
-      setNewTask((prev) => ({
-        ...prev,
-        userEmails: '',
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('/api/task', newTask);
-      setShowModal(false);
-      const { data } = await axios.get('/api/task', {
-        params: {
-          search: searchTerm,
-          sort: sortOption,
-          status: statusFilter,
-        },
-      });
-      setTasks(data.tasks);
-    } catch (error) {
-      console.error('Error creating task:', error);
-    }
   };
 
   const handleOpenPopup = (task) => {
@@ -213,79 +172,7 @@ const MyTasks = () => {
             {showModal && (
               <div style={styles.modal}>
                 <div style={styles.modalContent}>
-                  <h3>Create Task</h3>
-                  <form onSubmit={handleSubmit}>
-                    <input
-                      type="text"
-                      name="title"
-                      placeholder="Title"
-                      value={newTask.title}
-                      onChange={handleInputChange}
-                      style={styles.input}
-                      required
-                    />
-                    <textarea
-                      name="description"
-                      placeholder="Description"
-                      value={newTask.description}
-                      onChange={handleInputChange}
-                      style={styles.textarea}
-                      required
-                    />
-                    <input
-                      type="text"
-                      name="priority"
-                      placeholder="Priority"
-                      value={newTask.priority}
-                      onChange={handleInputChange}
-                      style={styles.input}
-                      required
-                    />
-                    <input
-                      type="date"
-                      name="dueDate"
-                      placeholder="Due Date"
-                      value={newTask.dueDate}
-                      onChange={handleInputChange}
-                      style={styles.input}
-                      required
-                    />
-                    <div>
-                      <label>
-                        <input
-                          type="radio"
-                          name="assignee"
-                          value="self"
-                          checked={assignee === 'self'}
-                          onChange={handleAssigneeChange}
-                        />
-                        Assign to Self
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          name="assignee"
-                          value="user"
-                          checked={assignee === 'user'}
-                          onChange={handleAssigneeChange}
-                        />
-                        Assign to User
-                      </label>
-                      {assignee === 'user' && (
-                        <input
-                          type="email"
-                          name="userEmails"
-                          placeholder="User Email"
-                          value={newTask.userEmails}
-                          onChange={handleInputChange}
-                          style={styles.input}
-                          required
-                        />
-                      )}
-                    </div>
-                    <button type="submit" style={styles.button}>Create Task</button>
-                    <button type="button" onClick={handleCloseModal} style={styles.button}>Cancel</button>
-                  </form>
+                <CreateAssignTask onClose={handleCloseModal} />
                 </div>
               </div>
             )}
@@ -296,14 +183,20 @@ const MyTasks = () => {
                 {filteredAndSortedTasks.map((task) => (
                   <li key={task._id} style={styles.taskItem}>
                     <h3>{task.title}</h3>
-                    <p>{task.description}</p>
-                    <p>Priority: {task.priority}</p>
-                    <p>Status: {task.status}</p>
+                    <p style={styles.taskDescription}>{task.description}</p>
                     <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
+                    <div style={styles.divStyles}>
+                      <p style={styles.psStyles} >{task.priority}</p>
+                    <p style={styles.psStyles}> {task.status}</p>
+                    </div>
                     {task.status !== 'sent for review' && task.status !== 'completed' && (
+                     
+                     <div style={styles.submitStyles}>
                       <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
                         Submit
                       </button>
+                     </div>
+                     
                     )}
                   </li>
                 ))}
@@ -333,6 +226,34 @@ const MyTasks = () => {
 };
 
 const styles = {
+
+  divStyles: {
+    // backgroundColor: '#003300',
+    padding: '5px',
+    // width: '65px',
+    display: 'flex',
+    justifyContent: 'space-around',
+    borderRadius: '15px',
+    color: 'white', // Light grey background
+  },
+  submitStyles: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    // marginTop: '10px',
+  },
+  psStyles: {
+    backgroundColor: 'rgba(0, 51, 0, 0.7)',
+    padding: '7px',
+    minWidth: '70px',
+    // width: '65px',
+    display: 'flex',
+    justifyContent: 'space-around',
+    borderRadius: '15px',
+    color: 'white', 
+  },
+  taskDescription: {
+    margin: '10px',
+  },
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -348,6 +269,7 @@ const styles = {
     textAlign: 'center',
   },
   heading: {
+    marginTop: '5%',
     marginBottom: '20px',
     fontSize: '2rem',
     color: '#003300',

@@ -154,91 +154,17 @@ const Dashboard = () => {
   return (
     <div>
       <Navbar />
-      <br />
-      <br />
-      <div style={styles.container}>
-        <div style={styles.content}>
-          <h2 style={styles.heading}>Dashboard</h2>
-          <div style={styles.searchSortContainer}>
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              value={searchTerm}
-              onChange={handleSearch}
-              style={styles.searchInput}
-            />
-            <select value={statusFilter} onChange={handleStatusFilter} style={styles.filterSelect}>
-            <option value="">Filter by Status</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="sent for review">Sent for Review</option>
-          </select>
-          <select value={sortOption} onChange={handleSort} style={styles.sortSelect}>
-            <option value="">Sort by</option>
-            <option value="priority">Priority</option>
-            <option value="dueDate">Due Date</option>
-          </select>
 
-          </div>
-          <div>
-            <button onClick={handleAddTask} style={styles.addButton}>Create Task</button>
-            {showModal && (
-              <div style={styles.modal}>
-                <div style={styles.modalContent}>
-                  <CreateAssignTask onClose={handleCloseModal} />
-                </div>
-              </div>
-            )}
-          </div>
-          <div style={styles.contentContainer}>
-            <div style={styles.taskContainer}>
-              <ul style={styles.taskList}>
-                {filteredAndSortedTasks.map((task) => (
-                  <li key={task._id} style={styles.taskItem}>
-                    <h3>{task.title}</h3>
-                    <p style={styles.taskDescription}>{task.description}</p>
-                    <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
-                    <div style={styles.divStyles}>
-                      <p style={styles.psStyles} >{task.priority}</p>
-                    <p style={styles.psStyles}> {task.status}</p>
-                    </div>
-                    {task.status !== 'sent for review' && task.status !== 'completed' && (
-                     
-                     <div style={styles.submitStyles}>
-                      <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
-                        Submit
-                      </button>
-                     </div>
-                     
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div style={styles.analyticsContainer}>
-              <Analytics />
-            </div>
-          </div>
-          {showPopup && (
-            <div style={styles.popup}>
-              <div style={styles.popupContent}>
-                <h3>Submit Task</h3>
-                <input
-                  type="text"
-                  placeholder="Attachment link"
-                  value={attachment}
-                  onChange={(e) => setAttachment(e.target.value)}
-                  style={styles.input}
-                />
-                <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
-                <button onClick={handleClosePopup} style={styles.button}>Close</button>
-              </div>
-            </div>
-          )}
-          
-        </div>
+      <div style={styles.analyticsContainer}>
+          <Analytics />
       </div>
+
     </div>
+         
+          
+        
+      
+    
   );
 };
 
@@ -335,6 +261,7 @@ const styles = {
     gap: '20px',
   },
   analyticsContainer: {
+    // marginTop: '5%',
     width: '100%', // Full width on small screens
     maxWidth: '35%', // Max width for larger screens
   },
