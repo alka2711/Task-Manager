@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell, faUser } from '@fortawesome/free-solid-svg-icons';
+import { height, width } from "@fortawesome/free-solid-svg-icons/fa0";
+
 
 const Navbar = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -163,7 +167,7 @@ const Navbar = () => {
           style={styles.icon}
           onClick={toggleNotifications}
         >
-          🔔
+          <FontAwesomeIcon icon={faBell} />
         </span>
         <ToastContainer />
         {isDropdownVisible && (
@@ -205,7 +209,7 @@ const Navbar = () => {
           style={styles.icon}
           onClick={handleUserDropdownClick}
         >
-          👤
+          <FontAwesomeIcon icon={faUser} />
         </span>
         {isUserDropdownVisible && (
           <div ref={userDropdownRef} style={styles.userDropdown}>
@@ -275,6 +279,7 @@ const styles = {
     width: "100%",
     height: "7%",
     display: "flex",
+    // alignItems: "center",
     justifyContent: "space-between",
     margin: "0",
     padding: "10px 20px",
@@ -300,10 +305,13 @@ const styles = {
     gap: "20px",
   },
   icon: {
+    display: "flex",
     fontSize: "20px",
     cursor: "pointer",
   },
   dropdown: {
+    width: "30%",
+    height: "550px",
     backgroundColor: "#fff",
     color: "black",
     padding: "10px",
@@ -312,13 +320,13 @@ const styles = {
     right: "10px",
     borderRadius: "5px",
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-    maxHeight: "200px",
+    
     overflowY: "auto",
-    zIndex: 1000,
+    zIndex: 100000,
   },
   userDropdown: {
     backgroundColor: "#fff",
-    color: "black",
+    color: "#003300",
     padding: "10px",
     position: "absolute",
     top: "40px",
@@ -332,13 +340,13 @@ const styles = {
     cursor: "pointer",
     wordWrap: "breakWord",
     whiteSpace: "normal",
-    color: "black",
+    color: "#003300",
   },
 
   markAsReadButton: {
     padding: '5px 10px',
     marginTop: '5px',
-    backgroundColor: 'blue', // Green button color
+    backgroundColor: '#003300', // Green button color
     color: 'white',
     border: 'none',
     borderRadius: '5px',
@@ -347,7 +355,7 @@ const styles = {
   
   button: {
     padding: "8px 16px",
-    backgroundColor: "#007BFF",
+    backgroundColor: "#003300",
     color: "#fff",
     border: "none",
     borderRadius: "5px",
