@@ -321,7 +321,7 @@ const styles = {
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
     
     overflowY: "auto",
-    zIndex: 100000,
+    zIndex: 1000,
   },
   userDropdown: {
     backgroundColor: "#fff",

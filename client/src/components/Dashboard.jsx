@@ -196,14 +196,20 @@ const Dashboard = () => {
                 {filteredAndSortedTasks.map((task) => (
                   <li key={task._id} style={styles.taskItem}>
                     <h3>{task.title}</h3>
-                    <p>{task.description}</p>
-                    <p>Priority: {task.priority}</p>
-                    <p>Status: {task.status}</p>
+                    <p style={styles.taskDescription}>{task.description}</p>
                     <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
+                    <div style={styles.divStyles}>
+                      <p style={styles.psStyles} >{task.priority}</p>
+                    <p style={styles.psStyles}> {task.status}</p>
+                    </div>
                     {task.status !== 'sent for review' && task.status !== 'completed' && (
+                     
+                     <div style={styles.submitStyles}>
                       <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
                         Submit
                       </button>
+                     </div>
+                     
                     )}
                   </li>
                 ))}
@@ -237,7 +243,35 @@ const Dashboard = () => {
 };
 
 const styles = {
-  container: {
+  divStyles: {
+    // backgroundColor: '#003300',
+    padding: '5px',
+    // width: '65px',
+    display: 'flex',
+    justifyContent: 'space-around',
+    borderRadius: '15px',
+    color: 'white', // Light grey background
+  },
+  submitStyles: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    // marginTop: '10px',
+  },
+  psStyles: {
+    backgroundColor: 'rgba(0, 51, 0, 0.7)',
+    padding: '7px',
+    minWidth: '70px',
+    // width: '65px',
+    display: 'flex',
+    justifyContent: 'space-around',
+    borderRadius: '15px',
+    color: 'white', 
+  },
+
+  taskDescription: {
+    margin: '10px',
+  },
+ container: {
     backgroundColor: '#f7f7f7', // Light grey background
     minHeight: '100vh',
   },
@@ -287,11 +321,13 @@ const styles = {
     marginBottom: '20px',
   },
   contentContainer: {
+     // White background for content
     display: 'flex',
     justifyContent: 'space-between',
     flexWrap: 'wrap', // Allows content to adjust
   },
   taskContainer: {
+    
     width: '100%', // Full width on small screens
     maxWidth: '60%', // Max width for larger screens
     display: 'flex',
@@ -303,6 +339,7 @@ const styles = {
     maxWidth: '35%', // Max width for larger screens
   },
   taskList: {
+    
     listStyleType: 'none',
     padding: 0,
     display: 'flex',
@@ -310,23 +347,25 @@ const styles = {
     gap: '20px',
   },
   taskItem: {
+    
     flex: '1 1 300px', // Fixed width for task items
     maxWidth: '300px', // Ensure task items do not exceed this width
     padding: '15px',
     border: '1px solid #ccc',
     borderRadius: '8px',
-    backgroundColor: '#fff', // White background for tasks
+    backgroundColor: '#B2D3C2', // White background for tasks
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   submitButton: {
-    padding: '10px',
+    
+    padding: '7px',
     fontSize: '16px',
     backgroundColor: 'rgb(0, 51, 0)', // Dark green submit button
     color: 'white',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '5px',
     cursor: 'pointer',
-    marginTop: '10px',
+    // marginTop: '10px',
   },
   modal: {
     position: 'fixed',
