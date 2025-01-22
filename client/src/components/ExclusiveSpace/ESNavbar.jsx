@@ -9,7 +9,7 @@ import { height, width } from "@fortawesome/free-solid-svg-icons/fa0";
 
 
 
-const Navbar = () => {
+const ESNavbar = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [isUserDropdownVisible, setIsUserDropdownVisible] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
@@ -26,47 +26,43 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/notifs/notifications");
-  
-        if (!response.ok) {
-          throw new Error("Failed to fetch notifications");
+        try {
+          setLoading(true);
+          const response = await fetch("/api/notifs/notifications");
+      
+          if (!response.ok) {
+            throw new Error("Failed to fetch notifications");
+          }
+      
+          const data = await response.json();
+          console.log(data); // Debug: Check the structure of the response
+      
+          // If the response is an object with a notifications array
+          const notificationsArray = Array.isArray(data) ? data : data.notifications;
+      
+          if (!Array.isArray(notificationsArray)) {
+            throw new Error("Unexpected response format: notifications should be an array");
+          }
+      
+          setNotifications(notificationsArray);
+      
+          // Identify the latest notification
+          const latestNotification = notificationsArray[0]; // Assuming the latest is at the beginning
+      
+          if (latestNotification) {
+            toast.info(`${latestNotification.title}`);
+          }
+        } catch (err) {
+          setError(err.message);
+          toast.error(`Error: ${err.message}`);
+        } finally {
+          setLoading(false);
         }
-  
-        const data = await response.json();
-        const notificationsArray = Array.isArray(data) ? data : data.notifications;
-  
-        if (!Array.isArray(notificationsArray)) {
-          throw new Error("Unexpected response format: notifications should be an array");
-        }
-  
-        setNotifications(notificationsArray);
-  
-        const latestNotification = notificationsArray[0]; // Assuming the latest is at the beginning
-  
-        if (latestNotification) {
-          toast.info(`${latestNotification.title}`, {
-            style: {
-              backgroundColor: "#003300", // Dark green background for the toast
-              color: "#fff",              // White text
-              marginTop: "9%",            // Adjust margin
-            },
-          });
-        }
-      } catch (err) {
-        setError(err.message);
-        toast.error(`Error: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    // Call the fetchNotifications function
-    fetchNotifications();
-  }, []); // Empty dependency array to run only once
-  
-  useEffect(() => {
+      };
+      
+      fetchNotifications();
+      
+      
     const handleClickOutside = (event) => {
       if (
         !dropdownRef.current?.contains(event.target) &&
@@ -78,14 +74,13 @@ const Navbar = () => {
         setIsUserDropdownVisible(false);
       }
     };
-  
+
     document.addEventListener("mousedown", handleClickOutside);
-  
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []); // Empty dependency array to add/remove the event listener once
-  
+  }, []);
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -261,19 +256,15 @@ const Navbar = () => {
             <details>
               <summary style={styles.link}> Tasks</summary>
               <p>
-              <Link to="/MyTasks" style={styles.tasklink}>
+              <Link to="/esMyTasks" style={styles.tasklink}>
                 Assigned to Me
               </Link>
-              <Link to="/TasksByMe" style={styles.tasklink}>
+              <Link to="/esTasksByMe" style={styles.tasklink}>
                 Assigned by Me
               </Link>
               </p>
             </details>
-            <div>
-              <Link to="/MyTeams" style={styles.link}>
-                My Teams
-              </Link>
-            </div>
+        
             <div>
               <Link to="/Profile" style={styles.link}>
                 Profile
@@ -434,4 +425,4 @@ const styles = {
   },
 };
 
-export default Navbar;
+export default ESNavbar;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Navbar from './Navbar';
-import CreateAssignTask from './CreateAssignTask.jsx';
 
-const MyTasks = () => {
+import ESNavbar from './ESNavbar';
+// import CreateAssignTask from './CreateAssignTask.jsx';
+
+const ESMyTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('');
@@ -19,16 +20,9 @@ const MyTasks = () => {
   });
   const [showPopup, setShowPopup] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
-  // const [attachment, setAttachment] = useState('');
+  const [attachment, setAttachment] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [assignee, setAssignee] = useState('self'); // New state for assignee
-  const [attachment, setAttachment] = useState(null); // For file attachments
-  const [githubLink, setGithubLink] = useState(''); // For GitHub repository link
-  const [taskLink, setTaskLink] = useState('');
-
-  const handleFileChange = (e) => {
-    setAttachment(e.target.files[0]);
-  };
 
   useEffect(() => {
     const fetchLoggedInUser = async () => {
@@ -45,7 +39,7 @@ const MyTasks = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const { data } = await axios.get('/api/task/teamtasks', {
+      const { data } = await axios.get('/api/task', {
         params: {
           search: searchTerm,
           sort: sortOption,
@@ -99,40 +93,24 @@ const MyTasks = () => {
       return;
     }
 
-    if (!attachment && !githubLink && !taskLink) {
-      alert('Please attach a file, GitHub link, or task link before submitting.');
-      return;
-    }
-
-    const formData = new FormData();
-    if (attachment) formData.append('attachment', attachment); // Add file if present
-    if (githubLink) formData.append('githubLink', githubLink); // Add GitHub link
-    if (taskLink) formData.append('taskLink', taskLink); // Add task link
-    formData.append('status', 'sent for review'); // Task status
-
     try {
-      // Submit the task with the provided data
-      await axios.post(`/api/task/submit/${currentTask._id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      await axios.post(`/api/task/submit/${currentTask._id}`, {
+        attachment,
+        status: 'sent for review',
+      });
+      handleClosePopup();
+      const { data } = await axios.get('/api/task', {
+        params: {
+          search: searchTerm,
+          sort: sortOption,
+          status: statusFilter,
         },
       });
-
-      // Update task status in the frontend
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task._id === currentTask._id ? { ...task, status: 'sent for review' } : task
-        )
-      );
-
-      handleClosePopup(); // Close the popup after submission
+      setTasks(data.tasks);
     } catch (error) {
       console.error('Error submitting task:', error);
     }
   };
-  
-  
-  
 
   const sortTasks = (tasks) => {
     if (sortOption === 'priority') {
@@ -153,10 +131,10 @@ const MyTasks = () => {
 
   return (
     <div>
-      <Navbar />
+      <ESNavbar/>
       <div style={styles.container}>
         <div style={styles.content}>
-          <h2 style={styles.heading}>Tasks</h2>
+          <h2 style={styles.heading}>ES Tasks</h2>
           <h3 >Assigned to Me</h3>
           <div style={styles.searchSortContainer}>
             <input
@@ -216,44 +194,21 @@ const MyTasks = () => {
             </div>
           </div>
           {showPopup && (
- <div style={styles.popup}>
- <div style={styles.popupContent}>
-   <h2>Submit Task</h2>
-   <label style={styles.label}>Upload File</label>
-   <input
-     type="file"
-     onChange={handleFileChange}
-     style={styles.input}
-   />
-
-   <label style={styles.label}>GitHub Repository Link</label>
-   <input
-     type="url"
-     placeholder="Enter GitHub link"
-     value={githubLink}
-     onChange={(e) => setGithubLink(e.target.value)}
-     style={styles.input}
-   />
-
-   <label style={styles.label}>Additional Link</label>
-   <input
-     type="url"
-     placeholder="Attach Additional links"
-     value={taskLink}
-     onChange={(e) => setTaskLink(e.target.value)}
-     style={styles.input}
-   />
-
-   <button onClick={handleSubmitTask} style={styles.button}>
-     Submit Task
-   </button>
-   <button onClick={handleClosePopup} style={styles.button}>
-     Close
-   </button>
- </div>
-</div>
-)}
-
+            <div style={styles.popup}>
+              <div style={styles.popupContent}>
+                <h3>Submit Task</h3>
+                <input
+                  type="text"
+                  placeholder="Attachment link"
+                  value={attachment}
+                  onChange={(e) => setAttachment(e.target.value)}
+                  style={styles.input}
+                />
+                <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
+                <button onClick={handleClosePopup} style={styles.button}>Close</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -434,13 +389,6 @@ const styles = {
     marginTop: '10px',
     marginRight: '20px',
   },
-  label: {
-    marginTop: '10px',
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-    textAlign: 'left',
-  },
   popup: {
     position: 'fixed',
     top: 0,
@@ -461,4 +409,4 @@ const styles = {
   },
 };
 
-export default MyTasks;
+export default ESMyTasks;

@@ -76,7 +76,7 @@ const LandingPage = () => {
                         <h1 style={styles.heading}>Exclusive Space</h1>
                         <p style={styles.paragraph}>Manage your tasks and assign tasks to up to one user, working together to achieve your goals.</p>
 
-                        <Link to="/MyTasks" style={styles.ctaButton}>
+                        <Link to="/ESMyTasks" style={styles.ctaButton}>
                             Get Started
                         </Link>
                     </div>

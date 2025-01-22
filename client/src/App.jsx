@@ -6,10 +6,12 @@ import MyTasks from './components/MyTasks';
 import Analytics from './components/Analytics';
 import Login from './components/Login';
 import './App.css';
- import LandingPage from './components/LandingPage';
+import LandingPage from './components/LandingPage';
 import Profile from './components/Profile'; 
 import MyTeams from './components/MyTeams';
-// import TasksByMe from './components/TasksByMe';
+import TasksByMe from './components/TasksByMe';
+import ESMyTasks from './components/ExclusiveSpace/ESMyTasks';
+import ESTasksByMe from './components/ExclusiveSpace/ESTasksByMe';
 
 const App = () => {
   return (
@@ -23,8 +25,10 @@ const App = () => {
           <Route path="/LandingPage" element={<LandingPage />} />
           <Route path="/Profile" element={<Profile/>} />
           <Route path="/MyTasks" element={<MyTasks />} />
-          {/* <Route path="/Tasksbyme" element={<TasksByMe />} /> */}
+          <Route path="/Tasksbyme" element={<TasksByMe />} />
           <Route path="/MyTeams" element={<MyTeams />} />
+          <Route path="/esMyTasks" element={<ESMyTasks/>} />
+          <Route path='/esTasksByMe' element={<ESTasksByMe/>} />
         </Routes>
       </div>
     </Router>

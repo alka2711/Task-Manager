@@ -114,14 +114,19 @@ const Profile = () => {
               <h2 style={styles.settingsHeading}>Settings</h2>
               <div style={styles.settingOptions}>
                 <a href="/change-username" style={{ color: '#003300', textDecoration: 'none', display: 'block', margin: '10px 0' }}>
-                  1. Change Username
+                 Change Username 
                 </a>
                 <a href="/change-password" style={{ color: '#003300', textDecoration: 'none', display: 'block', margin: '10px 0' }}>
-                  2. Change Password
+                Change Password  
+                </a>
+                <a href="/change-password" style={{ color: '#003300', textDecoration: 'none', display: 'block', margin: '10px 0' }}>
+                Verify Email  
                 </a>
               </div>
               <div style={styles.settingButtons}>
-                {/* Add setting buttons content here */}
+              <button style={styles.button}>Delete Account</button>
+            <button style={styles.button}>Help</button>
+            <button style={styles.button}>Support</button>
               </div>
             </div>
           </div>
@@ -202,14 +207,14 @@ const styles = {
     backgroundColor: '#f0f0f0',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: 'flex-start', // Align children to the left horizontally
+    justifyContent: 'flex-start', // Align children to the top vertically
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     fontSize: '1rem',
     color: '#003300',
     padding: '20px',
-  },
+},
   settingsHeading: {
     textAlign: 'center',
     width: '100%',
@@ -217,14 +222,29 @@ const styles = {
   settingOptions: {
     marginTop: '20px',
     padding: '10px',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#f0f0f0',
     borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    justifyContent:'left',
+    alignItems:'left',
   },
   settingButtons: {
     marginTop: '20px',
     display: 'flex',
     justifyContent: 'space-around',
+  },
+  button: {
+    padding: '10px 20px',
+    fontSize: '1rem',
+    backgroundColor: 'rgb(0, 51, 0)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginBottom: '20px',
+    marginTop: '60px',
+    marginLeft:'60px',
+    display:'flex',
+    justifyContent:'space-around',
   },
 };
 

@@ -28,7 +28,8 @@ const createAndAssignTask = async (req, res) => {
             description,
             priority,
             dueDate,
-            team: [assignerId, ...userIds]
+            team: [assignerId, ...userIds],
+            taskType: 'assigned_by_individual',
         });
 
         await task.save();
@@ -64,54 +65,93 @@ const createAndAssignTask = async (req, res) => {
 };
 
 const submitTask = async (req, res) => {
-    const { taskId } = req.params;
-    const { files, status } = req.body;
-    const userId = req.user._id;
+    const { taskId } = req.params; // Task ID from URL
+    const { githubLink, taskLink, status } = req.body; // Extracting data from request body
+    const userId = req.user._id; // Authenticated user ID
 
     try {
+        // Find the task and populate the team field
         const task = await Task.findById(taskId).populate('team');
 
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
+        // Check if the assigner is attempting to submit the task
         if (task.team[0]._id.toString() === userId.toString()) {
             return res.status(403).json({ message: 'Assigners cannot submit the task they assigned' });
         }
 
+        // Validate input: Ensure at least one of githubLink or taskLink is provided
+        if (!githubLink && !taskLink) {
+            return res.status(400).json({ message: 'Please provide either a GitHub link or a task link.' });
+        }
+
+        // Create a new activity for the task
         const newActivity = {
             status: 'sent for review',
             by: userId, 
-            files: files || [],
+            githubLink: githubLink || null,
+            taskLink: taskLink || null,
         };
 
+        // Push the activity and update the task status
         task.activities.push(newActivity);
         task.status = 'sent for review';
 
-        
-            const assignerId = task.team[0]._id;
-            const assignerNotification = {
-                user: assignerId,
-                title: `Task Completed: ${task.title}`,
-                text: `${req.user.name} has completed the task, waiting for your approval.`,
-                task: task._id,
-                notiType: 'alert',
-            };
-            await Notifs.create(assignerNotification);
+        // Create notifications for assigner and user
+        const assignerId = task.team[0]._id;
 
-            const userNotification = {
-                user: userId,
-                title: `Task Submitted: ${task.title}`,
-                text: `Sent to ${task.team[0].name} for review.`,
-                task: task._id,
-                notiType: 'alert',
-            };
-            await Notifs.create(userNotification);
-        
+        const assignerNotification = {
+            user: assignerId,
+            title: `Task Completed: ${task.title}`,
+            text: `${req.user.name} has completed the task, waiting for your approval.`,
+            task: task._id,
+            notiType: 'alert',
+        };
+        await Notifs.create(assignerNotification);
 
+        const userNotification = {
+            user: userId,
+            title: `Task Submitted: ${task.title}`,
+            text: `Sent to ${task.team[0].name} for review.`,
+            task: task._id,
+            notiType: 'alert',
+        };
+        await Notifs.create(userNotification);
+
+        // Save the updated task
         await task.save();
 
         res.status(200).json({ message: 'Task activity updated', task });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const getTaskDetails = async (req, res) => {
+    const { taskId } = req.params;
+
+    try {
+        const task = await Task.findById(taskId).populate('activities.by', 'name'); // Populate submitter name
+
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        const submission = task.activities.find(activity => activity.status === 'sent for review');
+
+        if (!submission) {
+            return res.status(404).json({ message: 'No submission found for this task' });
+        }
+
+        res.status(200).json({
+            submitter: submission.by.name,
+            githubLink: submission.githubLink || null,
+            taskLink: submission.taskLink || null,
+            attachedFiles: submission.files || [],
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -185,6 +225,34 @@ const dashboardStatistics = async (req, res) => {
     }
 };
 
+const getFiles = async (req, res) => {
+    const { taskId } = req.params;
+  
+    try {
+      const task = await Task.findById(taskId)
+        .populate('activities.by', 'name')  // Populate the user who submitted the task (name only)
+        .exec();
+  
+      if (!task) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+  
+      const latestActivity = task.activities.find((activity) => activity.status === 'sent for review');
+      if (!latestActivity) {
+        return res.status(404).json({ message: 'No review submission found for this task' });
+      }
+  
+      return res.status(200).json({
+        submitter: latestActivity.by,
+        files: latestActivity.files,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  };
+  
+
 
 const getTasks = async (req, res) => {
     try {
@@ -193,6 +261,7 @@ const getTasks = async (req, res) => {
         let query = {
             "team.0": { $ne: userId },
             team: userId, // Include only tasks where the user is part of the team
+            taskType: 'assigned_by_individual',
         };
 
         if (search) {
@@ -220,21 +289,139 @@ const getTasks = async (req, res) => {
     }
 };
 
-const getTask = async (req, res) => {
+const getTeamTasks = async (req, res) => {
     try {
-        const { id } = req.params;
-        const task = await Task.findById(id).populate('team', 'name title email');
+        const { search, sort } = req.query;
+        const userId = req.user._id;
 
-        if (!task) {
-            return res.status(404).json({ status: false, message: 'Task not found' });
+        console.log('User ID:', userId); // Log the user ID for debugging
+
+        let query = {
+            "team.0": { $ne: userId },
+            team: userId,
+            taskType: 'assigned_by_team', // Fetch only tasks created via assignTaskToTeam
+        };
+
+        console.log('Initial query:', query); // Log the initial query to check if it's set correctly
+
+        if (search) {
+            query = {
+                ...query,
+                $or: [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                ],
+            };
+            console.log('Query after search filter:', query); // Log the query after applying search filter
         }
 
-        res.status(200).json({ status: true, task });
+        let sortOption = {};
+        if (sort === 'priority') {
+            sortOption = { priority: 1 };
+        } else if (sort === 'status') {
+            sortOption = { status: 1 };
+        }
+
+        console.log('Sort option:', sortOption); // Log the sorting option
+
+        const tasks = await Task.find(query).sort(sortOption);
+
+        console.log('Found tasks:', tasks); // Log the tasks fetched from the database
+
+        res.json({ tasks });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ status: false, message: 'Server error', error: error.message });
+        console.error('Error fetching team tasks:', error); // Log any errors that occur
+        res.status(500).json({ status: false, message: 'Server error', error: error.message });
     }
 };
+
+  
+
+
+// Get tasks where the assigner is an individual
+const getAssignerTasks = async (req, res) => {
+    const assignerId = req.user._id; // Extract the assigner's ID from the authenticated user's information
+
+    try {
+        // Fetch tasks where the assigner is at the 0th index of the team array and the taskType is 'assigned_by_individual'
+        const tasks = await Task.find({ 
+            "team.0": assignerId, 
+            taskType: 'assigned_by_individual' 
+        });
+
+        if (!tasks || tasks.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'No tasks found where you are the assigner at index 0.'
+            });
+        }
+
+        res.status(200).json({
+            status: true,
+            message: 'Tasks fetched successfully',
+            tasks
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
+// Get tasks assigned by the team
+const getTeamAssignerTasks = async (req, res) => {
+    const assignerId = req.user._id; // Extract the assigner's ID from the authenticated user's information
+
+    try {
+        // Fetch tasks where the assigner is at the 0th index of the team array and the taskType is 'assigned_by_team'
+        const tasks = await Task.find({ 
+            "team.0": assignerId, 
+            taskType: 'assigned_by_team' 
+        });
+
+        if (!tasks || tasks.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'No tasks found where you are the assigner at index 0.'
+            });
+        }
+
+        res.status(200).json({
+            status: true,
+            message: 'Tasks fetched successfully',
+            tasks
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
+
+
+
+// const getTask = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const task = await Task.findById(id).populate('team', 'name title email');
+
+//         if (!task) {
+//             return res.status(404).json({ status: false, message: 'Task not found' });
+//         }
+
+//         res.status(200).json({ status: true, task });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({ status: false, message: 'Server error', error: error.message });
+//     }
+// };
 
 const assignTaskToTeam = async (req, res) => {
     try {
@@ -284,6 +471,7 @@ const assignTaskToTeam = async (req, res) => {
             priority,
             dueDate,
             team: [assignerId, ...teamMembers], // Include assigner and team members
+            taskType: 'assigned_by_team',
         });
 
         await task.save();
@@ -321,6 +509,11 @@ module.exports = {
     submitTask,
     dashboardStatistics,
     getTasks,
-    getTask,
+    getTeamTasks,
+    // getTask,
     assignTaskToTeam,
+    getAssignerTasks,
+    getTeamAssignerTasks,
+    getFiles,
+    getTaskDetails,
 };
