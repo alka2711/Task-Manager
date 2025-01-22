@@ -9,7 +9,7 @@ import './App.css';
  import LandingPage from './components/LandingPage';
 import Profile from './components/Profile'; 
 import MyTeams from './components/MyTeams';
-import TasksByMe from './components/TasksByMe';
+// import TasksByMe from './components/TasksByMe';
 
 const App = () => {
   return (
@@ -23,7 +23,7 @@ const App = () => {
           <Route path="/LandingPage" element={<LandingPage />} />
           <Route path="/Profile" element={<Profile/>} />
           <Route path="/MyTasks" element={<MyTasks />} />
-          <Route path="/Tasksbyme" element={<TasksByMe />} />
+          {/* <Route path="/Tasksbyme" element={<TasksByMe />} /> */}
           <Route path="/MyTeams" element={<MyTeams />} />
         </Routes>
       </div>
