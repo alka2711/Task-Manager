@@ -19,21 +19,14 @@ const MyTasks = () => {
   });
   const [showPopup, setShowPopup] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
-  // const [attachment, setAttachment] = useState('');
+  const [attachment, setAttachment] = useState('');
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [assignee, setAssignee] = useState('self'); // New state for assignee
-  const [attachment, setAttachment] = useState(null); // For file attachments
-  const [githubLink, setGithubLink] = useState(''); // For GitHub repository link
-  const [taskLink, setTaskLink] = useState('');
-
-  const handleFileChange = (e) => {
-    setAttachment(e.target.files[0]);
-  };
 
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
-        // const user = await axios.get('/api/user');
+        const user = await axios.get('/api/user/profile');
         setLoggedInUser(user.data.email);
       } catch (error) {
         console.error('Error fetching logged-in user:', error);
@@ -98,39 +91,29 @@ const MyTasks = () => {
       console.error('No task selected');
       return;
     }
-
-    if (!attachment && !githubLink && !taskLink) {
-      alert('Please attach a file, GitHub link, or task link before submitting.');
-      return;
-    }
-
+  
     const formData = new FormData();
-    if (attachment) formData.append('attachment', attachment); // Add file if present
-    if (githubLink) formData.append('githubLink', githubLink); // Add GitHub link
-    if (taskLink) formData.append('taskLink', taskLink); // Add task link
-    formData.append('status', 'sent for review'); // Task status
-
+    formData.append('attachment', attachment); 
+    formData.append('status', 'sent for review'); // You can add other data like status if needed
+    
     try {
-      // Submit the task with the provided data
+      // Submit the task with the file
       await axios.post(`/api/task/submit/${currentTask._id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data', // Important for file uploads
         },
       });
-
-      // Update task status in the frontend
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task._id === currentTask._id ? { ...task, status: 'sent for review' } : task
-        )
-      );
-
-      handleClosePopup(); // Close the popup after submission
+  
+      // Update the task status in the frontend immediately after submission
+      setTasks(prevTasks => prevTasks.map(task =>
+        task._id === currentTask._id ? { ...task, status: 'sent for review' } : task
+      ));
+  
+      handleClosePopup(); // Close the popup
     } catch (error) {
       console.error('Error submitting task:', error);
     }
   };
-  
   
   
 
@@ -216,44 +199,21 @@ const MyTasks = () => {
             </div>
           </div>
           {showPopup && (
- <div style={styles.popup}>
- <div style={styles.popupContent}>
-   <h2>Submit Task</h2>
-   <label style={styles.label}>Upload File</label>
-   <input
-     type="file"
-     onChange={handleFileChange}
-     style={styles.input}
-   />
-
-   <label style={styles.label}>GitHub Repository Link</label>
-   <input
-     type="url"
-     placeholder="Enter GitHub link"
-     value={githubLink}
-     onChange={(e) => setGithubLink(e.target.value)}
-     style={styles.input}
-   />
-
-   <label style={styles.label}>Additional Link</label>
-   <input
-     type="url"
-     placeholder="Attach Additional links"
-     value={taskLink}
-     onChange={(e) => setTaskLink(e.target.value)}
-     style={styles.input}
-   />
-
-   <button onClick={handleSubmitTask} style={styles.button}>
-     Submit Task
-   </button>
-   <button onClick={handleClosePopup} style={styles.button}>
-     Close
-   </button>
- </div>
-</div>
-)}
-
+            <div style={styles.popup}>
+              <div style={styles.popupContent}>
+                <h3>Submit Task</h3>
+                <input
+                  type="text"
+                  placeholder="Attachment link"
+                  value={attachment}
+                  onChange={(e) => setAttachment(e.target.value)}
+                  style={styles.input}
+                />
+                <button onClick={handleSubmitTask} style={styles.button}>Submit Task</button>
+                <button onClick={handleClosePopup} style={styles.button}>Close</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -433,13 +393,6 @@ const styles = {
     cursor: 'pointer',
     marginTop: '10px',
     marginRight: '20px',
-  },
-  label: {
-    marginTop: '10px',
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-    textAlign: 'left',
   },
   popup: {
     position: 'fixed',

@@ -33,28 +33,41 @@ const TasksByMe = () => {
 
   const handleOpenPopup = async (task) => {
     try {
-        const { data } = await axios.get(`/api/task/${task._id}/details`);
-        setCurrentTask({
-            ...task,
-            submitter: data.submitter,
-            githubLink: data.githubLink,
-            taskLink: data.taskLink,
-            attachedFiles: data.attachedFiles,
-        });
-        setShowPopup(true);
+      const { data } = await axios.get(`/api/task/${task._id}/details`);
+      setCurrentTask({
+        ...task,
+        submitter: data.submitter,
+        githubLink: data.githubLink,
+        taskLink: data.taskLink,
+        // attachedFiles: data.attachedFiles,
+      });
+      setShowPopup(true);
     } catch (error) {
-        console.error('Error fetching task details:', error);
-        alert('Failed to fetch task details. Please try again.');
+      console.error('Error fetching task details:', error);
+      alert('Failed to fetch task details. Please try again.');
     }
-};
-
+  };
 
   const handleClosePopup = () => {
     setShowPopup(false);
     setCurrentTask(null);
   };
 
-  
+  const handleApprove = async () => {
+    try {
+      const updatedTask = { ...currentTask, status: 'completed' };
+      await axios.get(`/api/task/${currentTask._id}/approve`, updatedTask);
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === currentTask._id ? { ...task, status: 'approved' } : task
+        )
+      );
+      handleClosePopup(); // Close the popup after approval
+    } catch (error) {
+      console.error('Error approving task:', error);
+      alert('Failed to approve the task. Please try again.');
+    }
+  };
 
   const mapStatus = (status) => {
     switch (status) {
@@ -69,7 +82,9 @@ const TasksByMe = () => {
     }
   };
 
-  const filteredTasks = tasks.filter((task) => !statusFilter || mapStatus(task.status) === statusFilter);
+  const filteredTasks = tasks.filter(
+    (task) => !statusFilter || mapStatus(task.status) === statusFilter
+  );
 
   return (
     <div>
@@ -108,13 +123,12 @@ const TasksByMe = () => {
                   </div>
 
                   <div style={styles.submitStyles}>
-                        {task.status === 'sent for review' && (
-                            <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
-                            View
-                            </button>
-                        )}
-                    </div>
-
+                    {task.status === 'sent for review' && (
+                      <button onClick={() => handleOpenPopup(task)} style={styles.submitButton}>
+                        View
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -122,46 +136,53 @@ const TasksByMe = () => {
         </div>
 
         {showPopup && (
-    <div style={styles.popup}>
-        <div style={styles.popupContent}>
-            <h3>Submission by: {currentTask.submitter}</h3>
-            {currentTask.githubLink && (
+          <div style={styles.popup}>
+            <div style={styles.popupContent}>
+              <h3>Submission by: {currentTask.submitter}</h3>
+              {currentTask.githubLink && (
                 <p>
-                    <a href={currentTask.githubLink} target="_blank" rel="noopener noreferrer">
-                        GitHub Link
-                    </a>
+                  <a href={currentTask.githubLink} target="_blank" rel="noopener noreferrer">
+                    GitHub Link
+                  </a>
                 </p>
-            )}
-            {currentTask.taskLink && (
+              )}
+              {currentTask.taskLink && (
                 <p>
-                    <a href={currentTask.taskLink} target="_blank" rel="noopener noreferrer">
-                        Task Link
-                    </a>
+                  <a href={currentTask.taskLink} target="_blank" rel="noopener noreferrer">
+                    Task Link
+                  </a>
                 </p>
-            )}
-            {currentTask.attachedFiles.length > 0 && (
-                <div>
-                    <h4>Attached Files:</h4>
-                    <ul>
-                        {currentTask.attachedFiles.map((file, index) => (
-                            <li key={index}>
-                                <a href={file} target="_blank" rel="noopener noreferrer">
-                                    File {index + 1}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
+              )}
+              {/* {currentTask.attachedFiles.length > 0 && ( */}
+                {/* <div>
+                  <h4>Attached Files:</h4>
+                  <ul>
+                    {currentTask.attachedFiles.map((file, index) => (
+                      <li key={index}>
+                        <a href={file} target="_blank" rel="noopener noreferrer">
+                          File {index + 1}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-            )}
-            <button onClick={handleClosePopup} style={styles.button}>Close</button>
-        </div>
-    </div>
-)}
-
+              )} */}
+              <button onClick={handleClosePopup} style={styles.button}>
+                Close
+              </button>
+              <button onClick={handleApprove} style={styles.button}>
+                Approve
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+
+
 
 
 const styles = {

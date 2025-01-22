@@ -65,62 +65,51 @@ const createAndAssignTask = async (req, res) => {
 };
 
 const submitTask = async (req, res) => {
-    const { taskId } = req.params; // Task ID from URL
-    const { githubLink, taskLink, status } = req.body; // Extracting data from request body
-    const userId = req.user._id; // Authenticated user ID
+    const { taskId } = req.params;
+    const { files, status } = req.body;
+    const userId = req.user._id;
 
     try {
-        // Find the task and populate the team field
         const task = await Task.findById(taskId).populate('team');
 
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        // Check if the assigner is attempting to submit the task
         if (task.team[0]._id.toString() === userId.toString()) {
             return res.status(403).json({ message: 'Assigners cannot submit the task they assigned' });
         }
 
-        // Validate input: Ensure at least one of githubLink or taskLink is provided
-        if (!githubLink && !taskLink) {
-            return res.status(400).json({ message: 'Please provide either a GitHub link or a task link.' });
-        }
-
-        // Create a new activity for the task
         const newActivity = {
             status: 'sent for review',
             by: userId, 
-            githubLink: githubLink || null,
-            taskLink: taskLink || null,
+            files: files || [],
         };
 
-        // Push the activity and update the task status
         task.activities.push(newActivity);
         task.status = 'sent for review';
 
-        // Create notifications for assigner and user
-        const assignerId = task.team[0]._id;
+        
+            const assignerId = task.team[0]._id;
+            const assignerNotification = {
+                user: assignerId,
+                title: `Task Completed: ${task.title}`,
+                text: `${req.user.name} has completed the task, waiting for your approval.`,
+                task: task._id,
+                notiType: 'alert',
+            };
+            await Notifs.create(assignerNotification);
 
-        const assignerNotification = {
-            user: assignerId,
-            title: `Task Completed: ${task.title}`,
-            text: `${req.user.name} has completed the task, waiting for your approval.`,
-            task: task._id,
-            notiType: 'alert',
-        };
-        await Notifs.create(assignerNotification);
+            const userNotification = {
+                user: userId,
+                title: `Task Submitted: ${task.title}`,
+                text: `Sent to ${task.team[0].name} for review.`,
+                task: task._id,
+                notiType: 'alert',
+            };
+            await Notifs.create(userNotification);
+        
 
-        const userNotification = {
-            user: userId,
-            title: `Task Submitted: ${task.title}`,
-            text: `Sent to ${task.team[0].name} for review.`,
-            task: task._id,
-            notiType: 'alert',
-        };
-        await Notifs.create(userNotification);
-
-        // Save the updated task
         await task.save();
 
         res.status(200).json({ message: 'Task activity updated', task });
@@ -158,6 +147,59 @@ const getTaskDetails = async (req, res) => {
     }
 };
 
+const approveTask = async (req, res) => {
+    const { taskId } = req.params; // Get taskId from request parameters
+    const userId = req.user._id;  // Get the ID of the user who is approving the task
+    
+    try {
+      // Find the task by ID and populate 'activities.by' to get the name of the user
+      const task = await Task.findById(taskId).populate('activities.by', 'name'); 
+      
+      if (!task) {
+        return res.status(404).json({ message: 'Task not found' }); // Return 404 if task doesn't exist
+      }
+  
+      // Check if the task is already approved/completed
+      if (task.status === 'completed') {
+        return res.status(400).json({ message: 'Task is already approved' }); // Return 400 if task is already completed
+      }
+  
+      // Update the task status to 'completed' (or 'approved')
+      task.status = 'completed'; // You can change it to 'approved' if needed
+  
+      // Find the activity with status 'sent for review' and get the user who submitted it
+      const submission = task.activities.find(activity => activity.status === 'sent for review');
+      
+      if (!submission) {
+        return res.status(404).json({ message: 'No submission found for this task' });
+      }
+  
+      // Get the user who submitted the task (from activities.by)
+      const submittedByUserId = submission.by._id;  // Get the user ID of the one who submitted
+  
+      // Create a notification for the user who submitted the task
+      const userNotification = {
+        user: submittedByUserId, // Send notification to the user who submitted the task
+        title: `Task Approved: ${task.title}`,
+        text: `Your task titled "${task.title}" has been approved.`,
+        task: task._id,
+        notiType: 'alert',
+      };
+      
+      // Save the notification
+      await Notifs.create(userNotification);
+  
+      // Save the updated task status
+      await task.save();
+  
+      // Return the updated task with success message
+      res.status(200).json({ message: 'Task approved successfully', task });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      res.status(500).json({ message: 'Server error' }); // Return 500 in case of server error
+    }
+  };
+  
 
 const dashboardStatistics = async (req, res) => {
     try {
@@ -516,4 +558,5 @@ module.exports = {
     getTeamAssignerTasks,
     getFiles,
     getTaskDetails,
+    approveTask,
 };

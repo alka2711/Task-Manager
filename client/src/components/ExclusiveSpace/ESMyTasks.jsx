@@ -27,7 +27,7 @@ const ESMyTasks = () => {
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
-        // const user = await axios.get('/api/user');
+        const user = await axios.get('/api/user/profile');
         setLoggedInUser(user.data.email);
       } catch (error) {
         console.error('Error fetching logged-in user:', error);
@@ -98,15 +98,18 @@ const ESMyTasks = () => {
         attachment,
         status: 'sent for review',
       });
+      setTasks(prevTasks => prevTasks.map(task =>
+        task._id === currentTask._id ? { ...task, status: 'sent for review' } : task
+      ));
       handleClosePopup();
-      const { data } = await axios.get('/api/task', {
-        params: {
-          search: searchTerm,
-          sort: sortOption,
-          status: statusFilter,
-        },
-      });
-      setTasks(data.tasks);
+      // const { data } = await axios.get('/api/task', {
+      //   params: {
+      //     search: searchTerm,
+      //     sort: sortOption,
+      //     status: statusFilter,
+      //   },
+      // });
+      // setTasks(data.tasks);
     } catch (error) {
       console.error('Error submitting task:', error);
     }

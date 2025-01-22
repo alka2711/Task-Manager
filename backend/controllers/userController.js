@@ -75,20 +75,24 @@ const logoutUser = (req, res) => {
 
 const getUser = async (req, res) => {
     try {
-        if (req.user) {
-            res.json({
-                _id: req.user._id,
-                name: req.user.name,
-                email: req.user.email,
-            });
-        } else {
-            res.status(404).json({ message: 'User not found' });
+      if (req.user) {
+        const user = await User.findById(req.user._id); // Fetch user data from DB
+        if (user) {
+          return res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+          });
         }
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(401).json({ message: 'Not authorized' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+      console.error('Error in getUser:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+  };
+  
 
 const updateUser = async (req, res) => {
     try {

@@ -1,5 +1,5 @@
 const express = require('express');
-const { dashboardStatistics, createAndAssignTask, getTask,getTeamAssignerTasks ,getTasks, submitTask,getAssignerTasks, reviewTask, assignTaskToTeam, getTeamTasks, getFiles, getTaskDetails } = require('../controllers/taskController');
+const { dashboardStatistics, createAndAssignTask, getTask,getTeamAssignerTasks ,getTasks, submitTask,getAssignerTasks, reviewTask, assignTaskToTeam, getTeamTasks, getFiles, getTaskDetails, approveTask } = require('../controllers/taskController');
 const authMiddleware = require('../middlewares/authMiddleware.js'); 
 const { getTeam } = require('../controllers/teamController.js');
 
@@ -17,5 +17,7 @@ router.get('/assignerTask', authMiddleware, getAssignerTasks);
 router.get('/teamassignerTask', authMiddleware, getTeamAssignerTasks);
 router.get('/:taskId/files', authMiddleware, getFiles);
 router.get('/:taskId/details', authMiddleware, getTaskDetails);
+
+router.get('/:taskId/approve', authMiddleware, approveTask);
 
 module.exports = router;
